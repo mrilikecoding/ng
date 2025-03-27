@@ -121,16 +121,19 @@ function Terminal() {
     }
   }, [commandHistory]);
 
-  // Initial banner
+  // Initial banner - using a ref to ensure it only runs once
+  const bannerShownRef = useRef(false);
+  
   useEffect(() => {
-    // Only show banner on initial load
-    if (commandHistory.length === 0) {
+    // Only show banner on initial load and if not shown before
+    if (commandHistory.length === 0 && !bannerShownRef.current) {
+      bannerShownRef.current = true;
       const bannerOutput = commands.banner();
       bannerOutput.split('\n').forEach(line => {
         addCommandToHistory(line);
       });
     }
-  }, []);
+  }, [commandHistory.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
