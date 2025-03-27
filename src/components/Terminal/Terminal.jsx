@@ -3,6 +3,7 @@ import TerminalHeader from './TerminalHeader';
 import TerminalConsole from './TerminalConsole';
 import TerminalPrompt from './TerminalPrompt';
 import TerminalFooter from './TerminalFooter';
+import { useTheme } from '../../contexts/ThemeContext';
 import { commands } from '../../utils/commands';
 import './Terminal.css';
 
@@ -12,6 +13,7 @@ function Terminal() {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [status, setStatus] = useState('Ready');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   
   const consoleRef = useRef(null);
   const inputRef = useRef(null);
@@ -29,7 +31,7 @@ function Terminal() {
 
     if (commands[cmd]) {
       try {
-        output = commands[cmd](args, { toggleFullscreen });
+        output = commands[cmd](args, { toggleFullscreen, toggleTheme, theme });
         
         // Special handling for clear command
         if (cmd === 'clear' && output === 'CLEAR_COMMAND') {
@@ -138,10 +140,12 @@ function Terminal() {
   return (
     <>
       <div className="crt-effect"></div>
-      <div className={`container ${isFullscreen ? 'fullscreen' : ''}`} onClick={handleContainerClick}>
+      <div className={`container ${isFullscreen ? 'fullscreen' : ''} theme-${theme}`} onClick={handleContainerClick}>
         <TerminalHeader 
           isFullscreen={isFullscreen} 
-          toggleFullscreen={toggleFullscreen} 
+          toggleFullscreen={toggleFullscreen}
+          theme={theme}
+          toggleTheme={toggleTheme}
         />
 
         <TerminalConsole 

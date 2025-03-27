@@ -8,11 +8,17 @@ projects    - Show my portfolio
 contact     - Show contact information
 clear       - Clear the console
 banner      - Display welcome banner
-fullscreen  - Toggle fullscreen mode (or press F11)`;
+fullscreen  - Toggle fullscreen mode (or press F11)
+theme       - Toggle between light and dark mode`;
   },
   fullscreen: function(args, { toggleFullscreen }) {
     setTimeout(() => toggleFullscreen(), 100);
     return 'Toggling fullscreen mode...';
+  },
+  theme: function(args, { toggleTheme, theme }) {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTimeout(() => toggleTheme(), 100);
+    return `Switching to ${newTheme} mode...`;
   },
   about: function() {
     return `Nate Green - Developer, explorer, and creator.
