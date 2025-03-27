@@ -6,6 +6,7 @@ function App() {
   const [inputValue, setInputValue] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [status, setStatus] = useState('Ready');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const consoleRef = useRef(null);
   const inputRef = useRef(null);
@@ -19,7 +20,12 @@ skills      - List my technical skills
 projects    - Show my portfolio
 contact     - Show contact information
 clear       - Clear the console
-banner      - Display welcome banner`;
+banner      - Display welcome banner
+fullscreen  - Toggle fullscreen mode (or press F11)`;
+    },
+    fullscreen: function() {
+      setTimeout(() => toggleFullscreen({ stopPropagation: () => {} }), 100);
+      return 'Toggling fullscreen mode...';
     },
     about: function() {
       return `Nate Green - Developer, explorer, and creator.
@@ -105,6 +111,13 @@ Type 'help' for available commands.`;
 
   // Handle key press in input
   const handleKeyDown = (e) => {
+    // F11 or Alt+Enter to toggle fullscreen
+    if (e.key === 'F11' || (e.altKey && e.key === 'Enter')) {
+      e.preventDefault();
+      toggleFullscreen(e);
+      return;
+    }
+    
     if (e.key === 'Enter') {
       const command = inputValue;
       
@@ -141,6 +154,19 @@ Type 'help' for available commands.`;
   const handleContainerClick = () => {
     inputRef.current.focus();
   };
+  
+  // Toggle fullscreen mode
+  const toggleFullscreen = (e) => {
+    e.stopPropagation(); // Prevent container click handler from firing
+    setIsFullscreen(!isFullscreen);
+    
+    // Focus back on input after toggling
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+  };
 
   // Scroll to bottom of console when command history changes
   useEffect(() => {
@@ -151,19 +177,31 @@ Type 'help' for available commands.`;
 
   // Initial banner
   useEffect(() => {
-    const bannerOutput = commands.banner();
-    bannerOutput.split('\n').forEach(line => {
-      addCommandToHistory(line);
-    });
+    // Only show banner on initial load
+    if (commandHistory.length === 0) {
+      const bannerOutput = commands.banner();
+      bannerOutput.split('\n').forEach(line => {
+        addCommandToHistory(line);
+      });
+    }
   }, []);
 
   return (
     <>
       <div className="crt-effect"></div>
-      <div className="container" onClick={handleContainerClick}>
+      <div className={`container ${isFullscreen ? 'fullscreen' : ''}`} onClick={handleContainerClick}>
         <div className="header">
           <h1 className="domain">nate.green</h1>
-          <div className="header-info">v1.0.3</div>
+          <div className="header-info">
+            v1.0.3
+            <button 
+              className="fullscreen-toggle" 
+              onClick={toggleFullscreen} 
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? '⊠' : '⊞'}
+            </button>
+          </div>
         </div>
 
         <div className="console" ref={consoleRef}>
@@ -194,7 +232,10 @@ Type 'help' for available commands.`;
             />
             <div 
               className="cursor" 
-              style={{ left: `${cursorPosition * 8}px` }} // Approximate character width
+              style={{ 
+                left: `${Math.min(cursorPosition * 8, window.innerWidth * 0.8)}px`,
+                display: inputValue.length > 0 ? 'block' : 'none'
+              }}
             ></div>
           </div>
         </div>
