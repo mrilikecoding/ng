@@ -4,22 +4,42 @@ import TerminalConsole from './TerminalConsole';
 import TerminalPrompt from './TerminalPrompt';
 import TerminalFooter from './TerminalFooter';
 import { useTheme } from '../../contexts/ThemeContext';
-import { commands } from '../../utils/commands';
+import { loadCommands, executeCommand } from '../../commands/index';
 import './Terminal.css';
 
 function Terminal() {
   const [commandHistory, setCommandHistory] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [status, setStatus] = useState('Ready');
+  const [status, setStatus] = useState('Loading...');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [commandsLoaded, setCommandsLoaded] = useState(false);
   const { theme, toggleTheme } = useTheme();
   
   const consoleRef = useRef(null);
   const inputRef = useRef(null);
+  // Reference for future command registry manipulations
+  // const commandRegistryRef = useRef({});
+
+  // Load commands on component mount
+  useEffect(() => {
+    const initializeCommands = async () => {
+      try {
+        await loadCommands();
+        setCommandsLoaded(true);
+        setStatus('Ready');
+      } catch (error) {
+        console.error('Failed to load commands:', error);
+        setStatus('Error loading commands');
+        addCommandToHistory(`Error: Failed to initialize command system. ${error.message}`);
+      }
+    };
+
+    initializeCommands();
+  }, []);
 
   // Handle command execution
-  const executeCommand = (commandStr) => {
+  const processCommand = (commandStr) => {
     const args = commandStr.trim().split(' ');
     const cmd = args.shift().toLowerCase();
 
@@ -27,25 +47,28 @@ function Terminal() {
       return '';
     }
 
-    let output = '';
+    // Create context object with terminal state and functions
+    const context = {
+      toggleFullscreen,
+      toggleTheme,
+      theme
+    };
 
-    if (commands[cmd]) {
-      try {
-        output = commands[cmd](args, { toggleFullscreen, toggleTheme, theme });
-        
-        // Special handling for clear command
-        if (cmd === 'clear' && output === 'CLEAR_COMMAND') {
-          setCommandHistory([]);
-          return '';
-        }
-      } catch (e) {
-        output = `Error executing command: ${e.message}`;
+    // Execute the command
+    try {
+      const output = executeCommand(cmd, args, context);
+      
+      // Special handling for clear command
+      if (cmd === 'clear' && output === 'CLEAR_COMMAND') {
+        setCommandHistory([]);
+        return '';
       }
-    } else {
-      output = `Command not found: ${cmd}. Type 'help' for available commands.`;
+      
+      return output;
+    } catch (e) {
+      console.error(`Error executing command ${cmd}:`, e);
+      return `Error executing command: ${e.message}`;
     }
-
-    return output;
   };
 
   // Add a new line to the command history
@@ -66,7 +89,7 @@ function Terminal() {
     addCommandToHistory(cmd, true);
     
     // Get output
-    const output = executeCommand(cmd);
+    const output = processCommand(cmd);
     if (output) {
       output.split('\n').forEach(line => {
         addCommandToHistory(line);
@@ -100,7 +123,7 @@ function Terminal() {
       addCommandToHistory(command, true);
       
       // Execute command and get output
-      const output = executeCommand(command);
+      const output = processCommand(command);
       if (output) {
         output.split('\n').forEach(line => {
           addCommandToHistory(line);
@@ -154,15 +177,15 @@ function Terminal() {
   const bannerShownRef = useRef(false);
   
   useEffect(() => {
-    // Only show banner on initial load and if not shown before
-    if (commandHistory.length === 0 && !bannerShownRef.current) {
+    // Only show banner when commands are loaded and if not shown before
+    if (commandsLoaded && commandHistory.length === 0 && !bannerShownRef.current) {
       bannerShownRef.current = true;
-      const bannerOutput = commands.banner();
+      const bannerOutput = executeCommand('banner');
       bannerOutput.split('\n').forEach(line => {
         addCommandToHistory(line);
       });
     }
-  }, [commandHistory.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [commandsLoaded, commandHistory.length]);
 
   return (
     <>

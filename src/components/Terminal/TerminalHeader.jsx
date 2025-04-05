@@ -1,4 +1,3 @@
-import React from 'react';
 
 function TerminalHeader({ isFullscreen, toggleFullscreen, theme, toggleTheme }) {
   return (

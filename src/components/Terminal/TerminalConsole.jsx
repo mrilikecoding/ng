@@ -1,13 +1,33 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import { getAllCommands } from '../../commands/index';
 
 function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
-  // Check if a string matches a command name
+  // Set default commands list so we don't have to wait for getAllCommands() to load
+  const [availableCommands, setAvailableCommands] = useState([
+    'help', 'about', 'skills', 'projects', 'contact', 'clear', 'banner', 'fullscreen', 'theme'
+  ]);
+
+  // Load commands from registry when available
+  useEffect(() => {
+    try {
+      const commands = getAllCommands();
+      if (Object.keys(commands).length > 0) {
+        setAvailableCommands(Object.keys(commands));
+      }
+    } catch (error) {
+      console.error('Error loading commands for console:', error);
+      // Already have default commands from useState
+    }
+  }, []);
+
+  // Check if a string contains command names
   const extractCommands = (text) => {
-    // List of all available commands from help output
-    const availableCommands = ['help', 'about', 'skills', 'projects', 'contact', 'clear', 'banner', 'fullscreen', 'theme'];
-    
-    // Search for command words in the text
-    return availableCommands.filter(cmd => text.includes(cmd));
+    // Find command words that are surrounded by spaces, punctuation, or at start/end of text
+    return availableCommands.filter(cmd => {
+      // Create a regex pattern that matches the command as a whole word
+      const pattern = new RegExp(`(^|[^a-zA-Z0-9-])${cmd}($|[^a-zA-Z0-9-])`, 'i');
+      return pattern.test(text);
+    });
   };
 
   // Make command words clickable, but only in output lines

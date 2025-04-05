@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import Terminal from './Terminal';
 import { ThemeProvider } from '../../contexts/ThemeContext';
-import { commands } from '../../utils/commands';
+import * as commandSystem from '../../commands/index';
 
 // Mock localStorage and window.matchMedia
 beforeEach(() => {
@@ -32,16 +32,26 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-// Mock commands
-vi.mock('../../utils/commands', () => ({
-  commands: {
-    help: vi.fn(() => 'mock help output'),
-    banner: vi.fn(() => 'mock banner'),
-    clear: vi.fn(() => 'CLEAR_COMMAND'),
-    about: vi.fn(() => 'mock about output'),
-    fullscreen: vi.fn(() => 'mock fullscreen output'),
-    theme: vi.fn(() => 'mock theme output')
-  }
+// Mock command system
+vi.mock('../../commands/index', () => ({
+  loadCommands: vi.fn().mockResolvedValue({}),
+  executeCommand: vi.fn(cmd => {
+    if (cmd === 'banner') return 'mock banner';
+    if (cmd === 'help') return 'mock help output';
+    if (cmd === 'about') return 'mock about output';
+    if (cmd === 'clear') return 'CLEAR_COMMAND';
+    if (cmd === 'fullscreen') return 'mock fullscreen output';
+    if (cmd === 'theme') return 'mock theme output';
+    return `Command not found: ${cmd}`;
+  }),
+  getAllCommands: vi.fn().mockReturnValue({
+    help: {}, 
+    banner: {}, 
+    clear: {}, 
+    about: {}, 
+    fullscreen: {}, 
+    theme: {}
+  })
 }));
 
 const renderTerminal = () => {
@@ -57,42 +67,47 @@ describe('Terminal Component', () => {
     vi.clearAllMocks();
   });
 
-  it('renders terminal with banner on load', () => {
+  it('loads commands on initial render', async () => {
     renderTerminal();
-    expect(commands.banner).toHaveBeenCalled();
+    expect(commandSystem.loadCommands).toHaveBeenCalled();
     
-    // Find text in the console line elements
-    const consoleElement = screen.getByRole('textbox').closest('.container').querySelector('.console');
-    expect(within(consoleElement).getByText('mock')).toBeInTheDocument();
-    expect(within(consoleElement).getByText('banner')).toBeInTheDocument();
+    // Advance timers to resolve the async command loading
+    await vi.runAllTimersAsync();
+    
+    expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner');
   });
 
-  it('processes user input when enter is pressed', () => {
+  it('processes user input when enter is pressed', async () => {
     renderTerminal();
+    
+    // Wait for commands to load
+    await vi.runAllTimersAsync();
+    
     const input = screen.getByRole('textbox');
     
     fireEvent.change(input, { target: { value: 'help' }});
     fireEvent.keyDown(input, { key: 'Enter' });
     
-    expect(commands.help).toHaveBeenCalled();
+    expect(commandSystem.executeCommand).toHaveBeenCalledWith('help', [], expect.anything());
     
     // Run timers to handle the status update
     vi.runAllTimers();
     
-    // Use the more flexible matching because the output might be split across elements
+    // Check console for output
     const consoleElement = input.closest('.container').querySelector('.console');
-    
-    // Use getAllByText and check that at least one result exists
     const helpTextElements = within(consoleElement).getAllByText((content, element) => {
-      return element.textContent.includes('mock help output') ||
-             element.textContent.includes('mock help') && element.textContent.includes('output');
+      return element.textContent.includes('mock help output');
     });
+    
     expect(helpTextElements.length).toBeGreaterThan(0);
     expect(input.value).toBe('');
   });
 
-  it('clears the console when clear command is executed', () => {
+  it('clears the console when clear command is executed', async () => {
     renderTerminal();
+    
+    // Wait for commands to load
+    await vi.runAllTimersAsync();
     
     // First add some content
     const input = screen.getByRole('textbox');
@@ -109,26 +124,48 @@ describe('Terminal Component', () => {
     // Run timers again
     vi.runAllTimers();
     
-    expect(commands.clear).toHaveBeenCalled();
+    expect(commandSystem.executeCommand).toHaveBeenCalledWith('clear', [], expect.anything());
     
     const consoleElement = input.closest('.container').querySelector('.console');
     expect(within(consoleElement).queryByText('mock help output')).not.toBeInTheDocument();
   });
 
-  it('handles clickable commands', () => {
+  it('handles clickable commands', async () => {
+    // Mock getAllCommands to return command names for clickable detection
+    commandSystem.getAllCommands.mockReturnValue({
+      banner: { metadata: { name: 'banner' } }
+    });
+    
     renderTerminal();
     
-    // Find command span element
-    const consoleElement = screen.getByRole('textbox').closest('.container').querySelector('.console');
-    const commandSpan = within(consoleElement).getByText('banner');
+    // Wait for commands to load
+    await vi.runAllTimersAsync();
     
-    // Simulate clicking on it
-    fireEvent.click(commandSpan);
+    // Need to wait for the banner to be displayed
+    vi.runAllTimers();
+    
+    // Simulate outputting text with a clickable command
+    const input = screen.getByRole('textbox');
+    const consoleElement = input.closest('.container').querySelector('.console');
+    
+    // First put some content in the console that includes a command name
+    fireEvent.change(input, { target: { value: 'Type banner to see the banner' }});
+    fireEvent.keyDown(input, { key: 'Enter' });
     
     // Run timers
     vi.runAllTimers();
     
-    // This should trigger the command execution
-    expect(commands.banner).toHaveBeenCalledTimes(2); // Once for initial banner, once for click
+    // Find the clickable command
+    const bannerElements = within(consoleElement).getAllByText('banner');
+    expect(bannerElements.length).toBeGreaterThan(0);
+    
+    // Click the first one
+    fireEvent.click(bannerElements[0]);
+    
+    // Run timers
+    vi.runAllTimers();
+    
+    // The command should be executed
+    expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner', [], expect.anything());
   });
 });
