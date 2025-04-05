@@ -1,4 +1,4 @@
-.PHONY: start build lint preview
+.PHONY: start build lint preview test test-watch test-coverage
 
 start:
 	npm run dev
@@ -11,3 +11,12 @@ lint:
 
 preview:
 	npm run preview
+
+test:
+	npm run test
+
+test-watch:
+	npm run test:watch
+
+test-coverage:
+	npm run test:coverage
