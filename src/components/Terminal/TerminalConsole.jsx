@@ -30,14 +30,23 @@ function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
     });
   };
 
-  // Make command words clickable, but only in output lines
+  // Make command words clickable and render HTML, but only in output lines
   const renderOutputWithClickableCommands = (content) => {
     const commands = extractCommands(content);
     
-    if (commands.length === 0) {
+    // If there are no commands and no HTML tags, return as is
+    if (commands.length === 0 && !content.includes('<')) {
       return content;
     }
     
+    // If the content has HTML tags, process it differently
+    if (content.includes('<a ') || content.includes('</a>')) {
+      return (
+        <span dangerouslySetInnerHTML={{ __html: content }} />
+      );
+    }
+    
+    // For content without HTML links, process commands
     // Create a regex pattern to match all command words
     const pattern = new RegExp(`(${commands.join('|')})`, 'g');
     

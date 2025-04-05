@@ -1,28 +1,51 @@
-import { CATEGORIES } from '../index.js';
+import { CATEGORIES } from "../index.js";
 
 /**
  * Skills command - Displays technical skills
  */
 const skillsCommand = {
   metadata: {
-    name: 'skills',
-    description: 'List my technical skills',
-    usage: 'skills',
+    name: "skills",
+    description: "List my technical skills",
+    usage: "skills",
     category: CATEGORIES.CONTENT,
-    aliases: ['technologies', 'tech'],
+    aliases: ["technologies", "tech"],
   },
-  
+
   /**
    * Execute the skills command
    * @returns {string} List of technical skills
    */
   execute() {
     return `Technical Skills:
-• Languages: JavaScript, Python, Go, HTML/CSS
-• Frontend: React, Vue, TailwindCSS
-• Backend: Node.js, Express, Django
-• Tools: Git, Docker, AWS, Linux`;
-  }
+
+• Languages & Core: 
+  - Python, JavaScript, HTML/CSS, Ruby
+  - Learning Rust!
+  - Data Structures & Algorithms
+  - MS in Comptuer Science focused on Computational Perception and Interactive Intelligence
+
+• Machine Learning & Computer Vision:
+  - Pose Estimation 
+  - Real-time Video Classification
+  - Feature Engineering
+  - Scikit-learn, MLflow
+
+• Frontend:
+  - React
+  - Data Visualization
+
+• Backend:
+  - Flask / Django 
+  - Rails
+
+• DevOps & Tools:
+  - Docker
+  - Git, Version Control
+  - AWS, Cloud Services
+  - Linux, macOS`;
+  },
 };
 
 export default skillsCommand;
+
