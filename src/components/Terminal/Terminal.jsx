@@ -56,6 +56,33 @@ function Terminal() {
       ...(output ? [{ type: 'output', content: output }] : [])
     ]);
   };
+  
+  // Handle clickable command
+  const handleCommandClick = (cmd) => {
+    // Set the command in the input field
+    setInputValue(cmd);
+    
+    // Execute the command
+    addCommandToHistory(cmd, true);
+    
+    // Get output
+    const output = executeCommand(cmd);
+    if (output) {
+      output.split('\n').forEach(line => {
+        addCommandToHistory(line);
+      });
+    }
+    
+    // Clear input
+    setInputValue('');
+    setCursorPosition(0);
+    
+    // Update status
+    setStatus('Processing...');
+    setTimeout(() => {
+      setStatus('Ready');
+    }, 500);
+  };
 
   // Handle key press in input
   const handleKeyDown = (e) => {
@@ -151,6 +178,7 @@ function Terminal() {
         <TerminalConsole 
           consoleRef={consoleRef}
           commandHistory={commandHistory}
+          handleCommandClick={handleCommandClick}
         />
 
         <TerminalPrompt 
