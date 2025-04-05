@@ -20,56 +20,68 @@ function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
     }
   }, []);
 
-  // Check if a string contains command names
-  const extractCommands = (text) => {
-    // Find command words that are surrounded by spaces, punctuation, or at start/end of text
-    return availableCommands.filter(cmd => {
-      // Create a regex pattern that matches the command as a whole word
-      const pattern = new RegExp(`(^|[^a-zA-Z0-9-])${cmd}($|[^a-zA-Z0-9-])`, 'i');
-      return pattern.test(text);
-    });
-  };
-
-  // Make command words clickable and render HTML, but only in output lines
-  const renderOutputWithClickableCommands = (content) => {
-    const commands = extractCommands(content);
-    
-    // If there are no commands and no HTML tags, return as is
-    if (commands.length === 0 && !content.includes('<')) {
-      return content;
-    }
-    
-    // If the content has HTML tags, process it differently
-    if (content.includes('<a ') || content.includes('</a>')) {
+  // Process output lines - handle HTML and command tags
+  const renderOutput = (content) => {
+    // Handle regular HTML links
+    if ((content.includes('<a ') || content.includes('</a>')) && !content.includes('<cmd>')) {
       return (
         <span dangerouslySetInnerHTML={{ __html: content }} />
       );
     }
     
-    // For content without HTML links, process commands
-    // Create a regex pattern to match all command words
-    const pattern = new RegExp(`(${commands.join('|')})`, 'g');
-    
-    // Split the content based on the pattern
-    const parts = content.split(pattern);
-    
-    return parts.map((part, i) => {
-      // If this part is a command, make it clickable
-      if (commands.includes(part)) {
-        return (
+    // If content contains our special command tag, process it
+    if (content.includes('<cmd>')) {
+      // Create a regex pattern to match our command tags
+      const cmdPattern = /<cmd>(.*?)<\/cmd>/g;
+      
+      // Get all matches
+      const matches = [...content.matchAll(cmdPattern)];
+      const commandNames = matches.map(match => match[1]);
+      
+      if (matches.length === 0) {
+        return content;
+      }
+      
+      // Split the content on cmd tags and rebuild with clickable spans
+      const fragments = [];
+      let lastIndex = 0;
+      
+      matches.forEach((match, index) => {
+        // Get the text before the command
+        const beforeCmd = content.substring(lastIndex, match.index);
+        if (beforeCmd) {
+          fragments.push(<span key={`text-${index}`}>{beforeCmd}</span>);
+        }
+        
+        // Get the command name
+        const cmdName = match[1];
+        
+        // Add the command as a clickable span
+        fragments.push(
           <span 
-            key={i} 
+            key={`cmd-${index}`} 
             className="clickable-command" 
-            onClick={() => handleCommandClick(part)}
-            title={`Run '${part}' command`}
+            onClick={() => handleCommandClick(cmdName)}
+            title={`Run '${cmdName}' command`}
           >
-            {part}
+            {cmdName}
           </span>
         );
+        
+        // Update lastIndex to after this command tag
+        lastIndex = match.index + match[0].length;
+      });
+      
+      // Add any remaining text after the last command
+      if (lastIndex < content.length) {
+        fragments.push(<span key="text-last">{content.substring(lastIndex)}</span>);
       }
-      // Otherwise, just return the text
-      return part;
-    });
+      
+      return fragments;
+    }
+    
+    // For regular text without special tags
+    return content;
   };
 
   return (
@@ -82,7 +94,7 @@ function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
           {item.type === 'command' ? (
             <><span className="command-history">guest@nate.green:~$</span> {item.content}</>
           ) : (
-            renderOutputWithClickableCommands(item.content)
+            renderOutput(item.content)
           )}
         </div>
       ))}

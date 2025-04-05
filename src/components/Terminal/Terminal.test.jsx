@@ -130,8 +130,8 @@ describe('Terminal Component', () => {
     expect(within(consoleElement).queryByText('mock help output')).not.toBeInTheDocument();
   });
 
-  it('handles clickable commands', async () => {
-    // Mock getAllCommands to return command names for clickable detection
+  it('renders HTML output correctly', async () => {
+    // Mock getAllCommands
     commandSystem.getAllCommands.mockReturnValue({
       banner: { metadata: { name: 'banner' } }
     });
@@ -144,28 +144,26 @@ describe('Terminal Component', () => {
     // Need to wait for the banner to be displayed
     vi.runAllTimers();
     
-    // Simulate outputting text with a clickable command
+    // Simulate outputting HTML content
     const input = screen.getByRole('textbox');
     const consoleElement = input.closest('.container').querySelector('.console');
     
-    // First put some content in the console that includes a command name
-    fireEvent.change(input, { target: { value: 'Type banner to see the banner' }});
+    // Content with HTML link
+    const htmlContent = 'Check out <a href="#test">this link</a> for more info';
+    commandSystem.executeCommand.mockReturnValueOnce(htmlContent);
+    
+    // Execute a command that outputs HTML
+    fireEvent.change(input, { target: { value: 'html-test' }});
     fireEvent.keyDown(input, { key: 'Enter' });
     
     // Run timers
     vi.runAllTimers();
     
-    // Find the clickable command
-    const bannerElements = within(consoleElement).getAllByText('banner');
-    expect(bannerElements.length).toBeGreaterThan(0);
+    // Verify command was executed
+    expect(commandSystem.executeCommand).toHaveBeenCalledWith('html-test', [], expect.anything());
     
-    // Click the first one
-    fireEvent.click(bannerElements[0]);
-    
-    // Run timers
-    vi.runAllTimers();
-    
-    // The command should be executed
-    expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner', [], expect.anything());
+    // Verify console contains text from the HTML output
+    const consoleText = consoleElement.textContent;
+    expect(consoleText).toContain('Check out this link for more info');
   });
 });

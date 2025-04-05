@@ -60,11 +60,12 @@ Aliases: ${metadata.aliases.join(', ') || 'None'}
       
       commandNames.sort().forEach(name => {
         const command = commands[name];
-        output += `${name.padEnd(12)} - ${command.metadata.description}\n`;
+        // Add special markers to indicate this is a clickable command
+        output += `<cmd>${name}</cmd> - ${command.metadata.description}\n`;
       });
     });
     
-    output += '\nType \'help [command]\' for more information about a specific command.';
+    output += '\nType \'<cmd>help</cmd> [command]\' for more information about a specific command.';
     return output;
   }
 };

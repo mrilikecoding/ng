@@ -27,7 +27,7 @@ _   _       _         _____
 |_| \\_|\\__,_|\\__\\___| \\_____|_|  \\___|\\__|_| |_|
 
 Welcome to nate.green interactive terminal [Version 1.0.3]
-Type 'help' for available commands.`;
+Type '<cmd>help</cmd>' for available commands.`;
   }
 };
 

@@ -110,7 +110,7 @@ export async function loadCommands() {
 export function executeCommand(commandName, args = [], context = {}) {
   const command = getCommand(commandName);
   if (!command) {
-    return `Command not found: ${commandName}`;
+    return `Command not found: ${commandName}. Type '<cmd>help</cmd>' for available commands.`;
   }
   
   try {

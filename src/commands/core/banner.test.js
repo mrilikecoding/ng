@@ -15,6 +15,6 @@ describe('Banner Command', () => {
     const output = bannerCommand.execute();
     expect(output).toContain('nate.green');
     expect(output).toContain('interactive terminal');
-    expect(output).toContain('Type \'help\'');
+    expect(output).toContain('<cmd>help</cmd>');
   });
 });
