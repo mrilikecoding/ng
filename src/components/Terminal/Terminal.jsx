@@ -223,6 +223,7 @@ function Terminal() {
 					toggleFullscreen={toggleFullscreen}
 					theme={theme}
 					toggleTheme={toggleTheme}
+					onHeaderClick={handleCommandClick}
 				/>
 
 				<TerminalConsole

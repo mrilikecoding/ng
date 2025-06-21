@@ -1,10 +1,26 @@
 
-function TerminalHeader({ isFullscreen, toggleFullscreen, theme, toggleTheme }) {
+import packageJson from '../../../package.json';
+
+function TerminalHeader({ isFullscreen, toggleFullscreen, theme, toggleTheme, onHeaderClick }) {
+  const handleHeaderClick = (e) => {
+    e.stopPropagation();
+    if (onHeaderClick) {
+      onHeaderClick('banner');
+    }
+  };
+
   return (
     <div className="header">
-      <h1 className="domain">nate.green</h1>
+      <h1 
+        className="domain" 
+        onClick={handleHeaderClick}
+        style={{ cursor: 'pointer' }}
+        title="Click to show banner"
+      >
+        nate.green
+      </h1>
       <div className="header-info">
-        v1.0.3
+        v{packageJson.version}
         <button 
           className="theme-toggle" 
           onClick={toggleTheme} 
