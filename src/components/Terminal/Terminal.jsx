@@ -12,7 +12,7 @@ function Terminal() {
   const [inputValue, setInputValue] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [status, setStatus] = useState('Loading...');
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(true);
   const [commandsLoaded, setCommandsLoaded] = useState(false);
   const { theme, toggleTheme } = useTheme();
   
