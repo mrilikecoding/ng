@@ -215,7 +215,7 @@ function Terminal() {
 		<>
 			<div className="crt-effect"></div>
 			<div
-				className={`container ${isFullscreen ? "fullscreen" : ""} theme-${theme}`}
+				className={`container ${isFullscreen ? "fullscreen" : ""}`}
 				onClick={handleContainerClick}
 			>
 				<TerminalHeader

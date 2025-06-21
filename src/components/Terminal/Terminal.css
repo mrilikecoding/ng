@@ -1,31 +1,31 @@
 /* Theme variables */
 :root {
   /* Dark theme (default) */
-  --bg-color: rgba(30, 30, 30, 0.9);
-  --text-color: #f0f0f0;
-  --header-bg: rgba(51, 51, 51, 0.95);
-  --prompt-bg: rgba(37, 37, 37, 0.95);
-  --border-color: #444;
-  --command-color: #0f0;
-  --command-history-color: #0a0;
-  --link-color: #0f0;
-  --status-color: #999;
+  --bg-color: rgba(17, 24, 39, 0.95);
+  --text-color: #f9fafb;
+  --header-bg: rgba(31, 41, 55, 0.98);
+  --prompt-bg: rgba(31, 41, 55, 0.98);
+  --border-color: #4b5563;
+  --command-color: #10b981;
+  --command-history-color: #34d399;
+  --link-color: #60a5fa;
+  --status-color: #9ca3af;
   --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   --terminal-backdrop-filter: blur(5px);
 }
 
 /* Light theme */
 [data-theme='light'] {
-  --bg-color: rgba(245, 245, 245, 0.9);
-  --text-color: #333;
-  --header-bg: rgba(224, 224, 224, 0.95);
-  --prompt-bg: rgba(234, 234, 234, 0.95);
-  --border-color: #ccc;
-  --command-color: #0a6b0a;
-  --command-history-color: #0a8a0a;
-  --link-color: #0a6b0a;
-  --status-color: #666;
-  --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  --bg-color: rgba(255, 255, 255, 0.95);
+  --text-color: #2c3e50;
+  --header-bg: rgba(248, 249, 250, 0.98);
+  --prompt-bg: rgba(248, 249, 250, 0.98);
+  --border-color: #d1d5db;
+  --command-color: #059669;
+  --command-history-color: #10b981;
+  --link-color: #2563eb;
+  --status-color: #6b7280;
+  --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   --terminal-backdrop-filter: blur(3px);
 }
 
@@ -216,23 +216,19 @@
 
 /* Clickable command links */
 .clickable-command {
-  color: #4a9eff;
+  color: var(--link-color);
   cursor: pointer;
   text-decoration: underline;
   font-weight: bold;
+  transition: all 0.2s ease;
 }
 
 .clickable-command:hover {
-  color: #6fb5ff;
-  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.8;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
-.theme-light .clickable-command {
-  color: #0066cc;
-}
-
-.theme-light .clickable-command:hover {
-  color: #0077ee;
+[data-theme='light'] .clickable-command:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
