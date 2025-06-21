@@ -1,4 +1,5 @@
 import { CATEGORIES } from '../index.js';
+import packageJson from '../../../package.json';
 
 /**
  * Banner command - Displays the welcome banner
@@ -26,7 +27,7 @@ _   _       _         _____
 | |\\  | (_| | ||  __/| |__| | | |  __/  __/ | | |
 |_| \\_|\\__,_|\\__\\___| \\_____|_|  \\___|\\__|_| |_|
 
-Welcome to nate.green interactive terminal [Version 1.0.3]
+Welcome to nate.green interactive terminal [Version ${packageJson.version}]
 Type '<cmd>help</cmd>' for available commands.`;
   }
 };
