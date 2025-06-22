@@ -94,7 +94,7 @@ function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
           {item.type === 'command' ? (
             <><span className="command-history">guest@nate.green:~$</span> {item.content}</>
           ) : (
-            renderOutput(item.content)
+            item.content === '' ? '\u00A0' : renderOutput(item.content)
           )}
         </div>
       ))}

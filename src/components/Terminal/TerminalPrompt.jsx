@@ -2,6 +2,7 @@
 function TerminalPrompt({ inputRef, inputValue, cursorPosition, handleInputChange, handleKeyDown }) {
   return (
     <div className="prompt">
+      <span className="prompt-prefix">guest@nate.green:~$</span>
       <div className="input-container">
         <input
           type="text"
@@ -15,8 +16,7 @@ function TerminalPrompt({ inputRef, inputValue, cursorPosition, handleInputChang
         <div 
           className="cursor" 
           style={{ 
-            left: `${Math.min(cursorPosition * 8, window.innerWidth * 0.8)}px`,
-            display: inputValue.length > 0 ? 'block' : 'none'
+            left: `${Math.min(cursorPosition * 8, window.innerWidth * 0.8)}px`
           }}
         ></div>
       </div>

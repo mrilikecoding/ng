@@ -12,7 +12,7 @@ function Terminal() {
 	const [inputValue, setInputValue] = useState("");
 	const [cursorPosition, setCursorPosition] = useState(0);
 	const [status, setStatus] = useState("Loading...");
-	const [isFullscreen, setIsFullscreen] = useState(true);
+	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [commandsLoaded, setCommandsLoaded] = useState(false);
 	const { theme, toggleTheme } = useTheme();
 
@@ -96,9 +96,13 @@ function Terminal() {
 		// Get output
 		const output = processCommand(cmd);
 		if (output) {
+			// Add spacing before output
+			addCommandToHistory("");
 			output.split("\n").forEach((line) => {
 				addCommandToHistory(line);
 			});
+			// Add spacing after output
+			addCommandToHistory("");
 		}
 
 		// Add available commands footer to output
@@ -139,9 +143,13 @@ function Terminal() {
 			// Execute command and get output
 			const output = processCommand(command);
 			if (output) {
+				// Add spacing before output
+				addCommandToHistory("");
 				output.split("\n").forEach((line) => {
 					addCommandToHistory(line);
 				});
+				// Add spacing after output
+				addCommandToHistory("");
 			}
 
 			// Add available commands footer to output
@@ -186,10 +194,10 @@ function Terminal() {
 		}, 100);
 	};
 
-	// Scroll to bottom of console when command history changes
+	// Scroll to top of console when command history changes (after command execution)
 	useEffect(() => {
 		if (consoleRef.current) {
-			consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+			consoleRef.current.scrollTop = 0;
 		}
 	}, [commandHistory]);
 
@@ -205,9 +213,13 @@ function Terminal() {
 		) {
 			bannerShownRef.current = true;
 			const bannerOutput = executeCommand("banner");
+			// Add spacing before banner
+			addCommandToHistory("");
 			bannerOutput.split("\n").forEach((line) => {
 				addCommandToHistory(line);
 			});
+			// Add spacing after banner
+			addCommandToHistory("");
 		}
 	}, [commandsLoaded, commandHistory.length]);
 
