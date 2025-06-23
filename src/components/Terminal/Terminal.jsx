@@ -82,6 +82,16 @@ function Terminal() {
 		]);
 	};
 
+	// Utility to detect mobile/touch devices
+	const isMobileDevice = () => {
+		return (
+			'ontouchstart' in window ||
+			navigator.maxTouchPoints > 0 ||
+			navigator.msMaxTouchPoints > 0 ||
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+		);
+	};
+
 	// Handle clickable command
 	const handleCommandClick = (cmd) => {
 		// Set the command in the input field
@@ -176,9 +186,11 @@ function Terminal() {
 		setCursorPosition(e.target.value.length);
 	};
 
-	// Focus input when container is clicked
+	// Focus input when container is clicked (but not on mobile for better UX)
 	const handleContainerClick = () => {
-		inputRef.current.focus();
+		if (!isMobileDevice()) {
+			inputRef.current.focus();
+		}
 	};
 
 	// Toggle fullscreen mode
