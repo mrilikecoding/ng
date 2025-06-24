@@ -1,1 +1,0 @@
-import{C as a}from"./index-9e4fb58b.js";const r={metadata:{name:"about",description:"Display information about me",usage:"about",category:a.CONTENT,aliases:["bio","profile"]},execute(){return"Hey there! I'm a software engineer, researcher, musician, and theater-maker. I also help run a small farm."}};export{r as default};

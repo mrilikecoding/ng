@@ -1,4 +1,4 @@
-import{C as e}from"./index-9e4fb58b.js";const t={metadata:{name:"sitemap",description:"Show site structure and available commands",usage:"sitemap",category:e.CORE,aliases:["map","structure"]},execute(){return`Site Structure & Commands
+import{C as e}from"./index-669675fd.js";const t={metadata:{name:"sitemap",description:"Show site structure and available commands",usage:"sitemap",category:e.CORE,aliases:["map","structure"]},execute(){return`Site Structure & Commands
 
 Core Navigation:
 ├── <cmd>about</cmd>      Learn about me and my background
