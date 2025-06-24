@@ -75,6 +75,9 @@ export async function loadCommands() {
     const themeModule = await import('./core/theme.js');
     registerCommand('theme', themeModule.default);
     
+    const sitemapModule = await import('./core/sitemap.js');
+    registerCommand('sitemap', sitemapModule.default);
+    
     // Load content commands
     const aboutModule = await import('./content/about.js');
     registerCommand('about', aboutModule.default);
