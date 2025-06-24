@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, within, act } from '@testing-library/react';
 import Terminal from './Terminal';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import * as commandSystem from '../../commands/index';
@@ -68,30 +68,43 @@ describe('Terminal Component', () => {
   });
 
   it('loads commands on initial render', async () => {
-    renderTerminal();
+    await act(async () => {
+      renderTerminal();
+    });
+    
     expect(commandSystem.loadCommands).toHaveBeenCalled();
     
-    // Advance timers to resolve the async command loading
-    await vi.runAllTimersAsync();
+    // Wait for async command loading and banner execution
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
     
     expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner');
   });
 
   it('processes user input when enter is pressed', async () => {
-    renderTerminal();
+    await act(async () => {
+      renderTerminal();
+    });
     
     // Wait for commands to load
-    await vi.runAllTimersAsync();
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
     
     const input = screen.getByRole('textbox');
     
-    fireEvent.change(input, { target: { value: 'help' }});
-    fireEvent.keyDown(input, { key: 'Enter' });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'help' }});
+      fireEvent.keyDown(input, { key: 'Enter' });
+    });
     
     expect(commandSystem.executeCommand).toHaveBeenCalledWith('help', [], expect.anything());
     
     // Run timers to handle the status update
-    vi.runAllTimers();
+    await act(async () => {
+      vi.runAllTimers();
+    });
     
     // Check console for output
     const consoleElement = input.closest('.container').querySelector('.console');
@@ -104,25 +117,37 @@ describe('Terminal Component', () => {
   });
 
   it('clears the console when clear command is executed', async () => {
-    renderTerminal();
+    await act(async () => {
+      renderTerminal();
+    });
     
     // Wait for commands to load
-    await vi.runAllTimersAsync();
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
     
     // First add some content
     const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: 'help' }});
-    fireEvent.keyDown(input, { key: 'Enter' });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'help' }});
+      fireEvent.keyDown(input, { key: 'Enter' });
+    });
     
     // Run timers
-    vi.runAllTimers();
+    await act(async () => {
+      vi.runAllTimers();
+    });
     
     // Now clear
-    fireEvent.change(input, { target: { value: 'clear' }});
-    fireEvent.keyDown(input, { key: 'Enter' });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'clear' }});
+      fireEvent.keyDown(input, { key: 'Enter' });
+    });
     
     // Run timers again
-    vi.runAllTimers();
+    await act(async () => {
+      vi.runAllTimers();
+    });
     
     expect(commandSystem.executeCommand).toHaveBeenCalledWith('clear', [], expect.anything());
     
@@ -136,13 +161,19 @@ describe('Terminal Component', () => {
       banner: { metadata: { name: 'banner' } }
     });
     
-    renderTerminal();
+    await act(async () => {
+      renderTerminal();
+    });
     
     // Wait for commands to load
-    await vi.runAllTimersAsync();
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
     
     // Need to wait for the banner to be displayed
-    vi.runAllTimers();
+    await act(async () => {
+      vi.runAllTimers();
+    });
     
     // Simulate outputting HTML content
     const input = screen.getByRole('textbox');
@@ -153,11 +184,15 @@ describe('Terminal Component', () => {
     commandSystem.executeCommand.mockReturnValueOnce(htmlContent);
     
     // Execute a command that outputs HTML
-    fireEvent.change(input, { target: { value: 'html-test' }});
-    fireEvent.keyDown(input, { key: 'Enter' });
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'html-test' }});
+      fireEvent.keyDown(input, { key: 'Enter' });
+    });
     
     // Run timers
-    vi.runAllTimers();
+    await act(async () => {
+      vi.runAllTimers();
+    });
     
     // Verify command was executed
     expect(commandSystem.executeCommand).toHaveBeenCalledWith('html-test', [], expect.anything());

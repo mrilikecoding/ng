@@ -1,6 +1,19 @@
 module.exports = {
   root: true,
-  env: { browser: true, es2020: true },
+  env: { 
+    browser: true, 
+    es2020: true,
+    node: true
+  },
+  globals: {
+    vi: 'readonly',
+    describe: 'readonly',
+    it: 'readonly',
+    expect: 'readonly',
+    beforeEach: 'readonly',
+    afterEach: 'readonly',
+    global: 'readonly'
+  },
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
@@ -14,8 +27,10 @@ module.exports = {
   rules: {
     'react-refresh/only-export-components': [
       'warn',
-      { allowConstantExport: true },
+      { allowConstantExport: true, allowExportNames: ['ThemeContext', 'useTheme'] },
     ],
     'react/prop-types': 'off',
+    'no-unused-vars': 'warn',
+    'no-console': 'off'
   },
 }

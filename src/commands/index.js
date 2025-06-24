@@ -49,7 +49,7 @@ export function getAllCommands() {
  */
 export function getCommandsByCategory(category) {
   return Object.entries(commandRegistry)
-    .filter(([, cmd]) => cmd.metadata.category === category)
+    .filter(([, cmd]) => cmd.metadata && cmd.metadata.category === category)
     .reduce((acc, [name, cmd]) => {
       acc[name] = cmd;
       return acc;

@@ -3,7 +3,7 @@ import { getAllCommands } from '../../commands/index';
 
 function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
   // Set default commands list so we don't have to wait for getAllCommands() to load
-  const [availableCommands, setAvailableCommands] = useState([
+  const [, setAvailableCommands] = useState([
     'help', 'about', 'skills', 'projects', 'contact', 'clear', 'banner', 'fullscreen', 'theme'
   ]);
 
@@ -36,7 +36,6 @@ function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
       
       // Get all matches
       const matches = [...content.matchAll(cmdPattern)];
-      const commandNames = matches.map(match => match[1]);
       
       if (matches.length === 0) {
         return content;
