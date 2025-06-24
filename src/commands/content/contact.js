@@ -18,8 +18,8 @@ const contactCommand = {
    */
   execute() {
     return `Contact Information:
-• Email: contact@nate.green
-• GitHub: github.com/mrilikecoding`;
+• Email: <a href="mailto:contact@nate.green" target="_blank" rel="noopener noreferrer">contact@nate.green</a>
+• GitHub: <a href="https://github.com/mrilikecoding" target="_blank" rel="noopener noreferrer">github.com/mrilikecoding</a>`;
   },
 };
 
