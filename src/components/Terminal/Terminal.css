@@ -298,6 +298,10 @@
 	.console {
 		padding: 1rem;
 	}
+
+	.console-line {
+		max-width: none;
+	}
 }
 
 @media (max-width: 480px) {
