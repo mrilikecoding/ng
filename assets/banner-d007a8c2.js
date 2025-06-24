@@ -1,4 +1,4 @@
-import{C as _,p as e}from"./index-c3109891.js";const n={metadata:{name:"banner",description:"Display welcome banner",usage:"banner",category:_.CORE,aliases:["welcome","intro"]},execute(){return`
+import{C as _,p as e}from"./index-9e4fb58b.js";const n={metadata:{name:"banner",description:"Display welcome banner",usage:"banner",category:_.CORE,aliases:["welcome","intro"]},execute(){return`
 _   _       _         _____
 | \\ | |     | |       / ____|
 |  \\| | __ _| |_ ___ | |  __ _ __ ___  ___ _ __

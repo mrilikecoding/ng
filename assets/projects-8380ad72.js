@@ -1,4 +1,4 @@
-import{C as e}from"./index-c3109891.js";const t={metadata:{name:"projects",description:"Show my portfolio",usage:"projects",category:e.CONTENT,aliases:["portfolio","work"]},execute(){return`
+import{C as e}from"./index-9e4fb58b.js";const t={metadata:{name:"projects",description:"Show my portfolio",usage:"projects",category:e.CONTENT,aliases:["portfolio","work"]},execute(){return`
 1. StreamPoseML
 
 StreamPoseML is an open-source, end-to-end toolkit for creating realtime, video-based classification experiments that rely on using labeled data alongside captured body keypoint / pose data.
