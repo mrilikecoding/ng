@@ -96,9 +96,10 @@ src/
 
 ### Terminal Experience
 - **Command execution** - Type commands to navigate
-- **Command history** - Previous commands are displayed
+- **Command history** - Navigate previous commands with ↑/↓ arrow keys
+- **Tab completion** - Press Tab to auto-complete command names
 - **Clickable commands** - Click on command names in output
-- **Auto-completion** - Tab completion for commands (coming soon)
+- **Smart suggestions** - Shows possible completions for partial commands
 
 ### Responsive Design
 - **Mobile optimized** - Touch-friendly interface

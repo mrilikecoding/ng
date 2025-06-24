@@ -4,7 +4,7 @@ import TerminalConsole from "./TerminalConsole";
 import TerminalPrompt from "./TerminalPrompt";
 import TerminalFooter from "./TerminalFooter";
 import { useTheme } from "../../contexts/ThemeContext";
-import { loadCommands, executeCommand } from "../../commands/index";
+import { loadCommands, executeCommand, getAllCommands } from "../../commands/index";
 import "./Terminal.css";
 
 function Terminal() {
@@ -14,6 +14,8 @@ function Terminal() {
 	const [status, setStatus] = useState("Loading...");
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [commandsLoaded, setCommandsLoaded] = useState(false);
+	const [inputHistory, setInputHistory] = useState([]);
+	const [historyIndex, setHistoryIndex] = useState(-1);
 	const { theme, toggleTheme } = useTheme();
 
 	const consoleRef = useRef(null);
@@ -94,6 +96,15 @@ function Terminal() {
 
 	// Handle clickable command
 	const handleCommandClick = (cmd) => {
+		// Add command to input history
+		setInputHistory(prev => {
+			const filtered = prev.filter(command => command !== cmd);
+			return [...filtered, cmd].slice(-50);
+		});
+
+		// Reset history navigation
+		setHistoryIndex(-1);
+
 		// Set the command in the input field
 		setInputValue(cmd);
 
@@ -118,7 +129,7 @@ function Terminal() {
 		// Add available commands footer to output
 		addCommandToHistory("=-=-=-=-=-=-=-=-=-=");
 		addCommandToHistory(
-			"ng-cli available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+			"ng-cli available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
 		);
 
 		// Clear input
@@ -132,6 +143,56 @@ function Terminal() {
 		}, 500);
 	};
 
+	// Get available commands for tab completion
+	const getAvailableCommands = () => {
+		try {
+			const commands = getAllCommands();
+			return Object.keys(commands);
+		} catch (error) {
+			// Fallback to default commands if registry not loaded
+			return ['help', 'about', 'skills', 'projects', 'contact', 'sitemap', 'clear', 'theme', 'fullscreen'];
+		}
+	};
+
+	// Handle tab completion
+	const handleTabCompletion = () => {
+		const availableCommands = getAvailableCommands();
+		const matches = availableCommands.filter(cmd => 
+			cmd.toLowerCase().startsWith(inputValue.toLowerCase())
+		);
+
+		if (matches.length === 1) {
+			// Single match - complete the command
+			setInputValue(matches[0]);
+			setCursorPosition(matches[0].length);
+		} else if (matches.length > 1) {
+			// Multiple matches - show suggestions without changing input
+			addCommandToHistory(`${inputValue}`, false);
+			addCommandToHistory(`Possible completions: ${matches.join(', ')}`, false);
+		}
+		// If no matches, do nothing (keep input unchanged)
+	};
+
+	// Handle command history navigation
+	const navigateHistory = (direction) => {
+		if (inputHistory.length === 0) return;
+
+		let newIndex;
+		if (direction === 'up') {
+			newIndex = historyIndex === -1 ? inputHistory.length - 1 : Math.max(0, historyIndex - 1);
+		} else {
+			newIndex = historyIndex === -1 ? -1 : Math.min(inputHistory.length - 1, historyIndex + 1);
+			if (newIndex === inputHistory.length - 1 && historyIndex === inputHistory.length - 1) {
+				newIndex = -1;
+			}
+		}
+
+		setHistoryIndex(newIndex);
+		const newValue = newIndex === -1 ? '' : inputHistory[newIndex];
+		setInputValue(newValue);
+		setCursorPosition(newValue.length);
+	};
+
 	// Handle key press in input
 	const handleKeyDown = (e) => {
 		// F11 or Alt+Enter to toggle fullscreen
@@ -141,13 +202,51 @@ function Terminal() {
 			return;
 		}
 
+		// Tab completion
+		if (e.key === "Tab") {
+			e.preventDefault();
+			handleTabCompletion();
+			return;
+		}
+
+		// Command history navigation
+		if (e.key === "ArrowUp") {
+			e.preventDefault();
+			navigateHistory('up');
+			return;
+		}
+
+		if (e.key === "ArrowDown") {
+			e.preventDefault();
+			navigateHistory('down');
+			return;
+		}
+
+		// Reset history index when typing
+		if (e.key !== "ArrowUp" && e.key !== "ArrowDown" && historyIndex !== -1) {
+			setHistoryIndex(-1);
+		}
+
 		if (e.key === "Enter") {
-			const command = inputValue;
+			const command = inputValue.trim();
+
+			// Only add non-empty commands to input history
+			if (command) {
+				setInputHistory(prev => {
+					// Avoid duplicates - remove if command already exists
+					const filtered = prev.filter(cmd => cmd !== command);
+					// Add to end and limit to last 50 commands
+					return [...filtered, command].slice(-50);
+				});
+			}
+
+			// Reset history navigation
+			setHistoryIndex(-1);
 
 			// Clear terminal before executing command
 			setCommandHistory([]);
 
-			// Add command to history
+			// Add command to history display
 			addCommandToHistory(command, true);
 
 			// Execute command and get output
@@ -165,7 +264,7 @@ function Terminal() {
 			// Add available commands footer to output
 			addCommandToHistory("");
 			addCommandToHistory(
-				"Available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+				"Available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
 			);
 
 			// Clear input
