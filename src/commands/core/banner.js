@@ -28,7 +28,14 @@ _   _       _         _____
 |_| \\_|\\__,_|\\__\\___| \\_____|_|  \\___|\\__|_| |_|
 
 Welcome to nate.green interactive terminal [Version ${packageJson.version}]
-Type '<cmd>help</cmd>' for available commands.`;
+
+Available commands:
+<cmd>about</cmd> - Display information about me
+<cmd>contact</cmd> - Get in touch
+<cmd>projects</cmd> - Show my portfolio
+<cmd>skills</cmd> - List my technical skills
+
+Type '<cmd>help</cmd>' for all commands.`;
   }
 };
 
