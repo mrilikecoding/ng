@@ -1,4 +1,4 @@
-import{C as e}from"./index-669675fd.js";const o={metadata:{name:"projects",description:"Show my portfolio",usage:"projects",category:e.CONTENT,aliases:["portfolio","work"]},execute(){return`
+import{C as e}from"./index-9351b8db.js";const o={metadata:{name:"projects",description:"Show my portfolio",usage:"projects",category:e.CONTENT,aliases:["portfolio","work"]},execute(){return`
 1. StreamPoseML
 
 An open-source toolkit for creating real-time pose classification applications. Built for researchers studying Parkinson's Disease patients in dance therapy settings with McCamish Foundation support. Provides complete workflow from video processing to model deployment, featuring MediaPipe pose detection, dataset annotation, and browser-based real-time classification.
