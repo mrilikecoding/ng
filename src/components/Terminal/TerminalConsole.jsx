@@ -22,8 +22,8 @@ function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
 
   // Process output lines - handle HTML and command tags
   const renderOutput = (content) => {
-    // Handle regular HTML links
-    if ((content.includes('<a ') || content.includes('</a>')) && !content.includes('<cmd>')) {
+    // Handle regular HTML links and rainbow spans
+    if ((content.includes('<a ') || content.includes('</a>') || content.includes('<span class="rainbow-char"')) && !content.includes('<cmd>')) {
       return (
         <span dangerouslySetInnerHTML={{ __html: content }} />
       );

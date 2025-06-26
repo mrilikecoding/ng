@@ -54,15 +54,32 @@ Aliases: ${metadata.aliases.join(', ') || 'None'}
       categorizedCommands[category].push(name);
     });
     
-    // Display commands by category
+    // Display commands by category (content first, then core, then others)
+    const categoryOrder = ['content', 'core', 'system', 'utility'];
+    
+    categoryOrder.forEach(category => {
+      if (categorizedCommands[category]) {
+        const commandNames = categorizedCommands[category];
+        output += `\n${category.charAt(0).toUpperCase() + category.slice(1)}:\n`;
+        
+        commandNames.sort().forEach(name => {
+          const command = commands[name];
+          // Add special markers to indicate this is a clickable command
+          output += `<cmd>${name}</cmd> - ${command.metadata.description}\n`;
+        });
+      }
+    });
+    
+    // Display any remaining categories not in the predefined order
     Object.entries(categorizedCommands).forEach(([category, commandNames]) => {
-      output += `\n${category.charAt(0).toUpperCase() + category.slice(1)}:\n`;
-      
-      commandNames.sort().forEach(name => {
-        const command = commands[name];
-        // Add special markers to indicate this is a clickable command
-        output += `<cmd>${name}</cmd> - ${command.metadata.description}\n`;
-      });
+      if (!categoryOrder.includes(category)) {
+        output += `\n${category.charAt(0).toUpperCase() + category.slice(1)}:\n`;
+        
+        commandNames.sort().forEach(name => {
+          const command = commands[name];
+          output += `<cmd>${name}</cmd> - ${command.metadata.description}\n`;
+        });
+      }
     });
     
     output += '\nType \'<cmd>help</cmd> [command]\' for more information about a specific command.';

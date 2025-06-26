@@ -26,12 +26,24 @@ export function registerCommand(name, commandModule) {
 }
 
 /**
- * Get a command by name
- * @param {string} name - Command name
+ * Get a command by name or alias
+ * @param {string} name - Command name or alias
  * @returns {Object|null} - Command module or null if not found
  */
 export function getCommand(name) {
-  return commandRegistry[name] || null;
+  // First try direct name lookup
+  if (commandRegistry[name]) {
+    return commandRegistry[name];
+  }
+  
+  // If not found, search through aliases
+  for (const [commandName, command] of Object.entries(commandRegistry)) {
+    if (command.metadata && command.metadata.aliases && command.metadata.aliases.includes(name)) {
+      return command;
+    }
+  }
+  
+  return null;
 }
 
 /**

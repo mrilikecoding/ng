@@ -126,11 +126,13 @@ function Terminal() {
 			addCommandToHistory("");
 		}
 
-		// Add available commands footer to output
-		addCommandToHistory("=-=-=-=-=-=-=-=-=-=");
-		addCommandToHistory(
-			"ng-cli available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
-		);
+		// Add available commands footer to output (skip for banner and help commands)
+		if (cmd !== 'banner' && !cmd.startsWith('banner ') && cmd !== 'help' && !cmd.startsWith('help ')) {
+			addCommandToHistory("=-=-=-=-=-=-=-=-=-=");
+			addCommandToHistory(
+				"ng-cli available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+			);
+		}
 
 		// Clear input
 		setInputValue("");
@@ -261,11 +263,13 @@ function Terminal() {
 				addCommandToHistory("");
 			}
 
-			// Add available commands footer to output
-			addCommandToHistory("");
-			addCommandToHistory(
-				"Available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
-			);
+			// Add available commands footer to output (skip for banner and help commands)
+			if (command !== 'banner' && !command.startsWith('banner ') && command !== 'help' && !command.startsWith('help ')) {
+				addCommandToHistory("");
+				addCommandToHistory(
+					"Available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+				);
+			}
 
 			// Clear input
 			setInputValue("");
