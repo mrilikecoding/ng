@@ -1,0 +1,1 @@
+import{C as o}from"./index-95f00b94.js";const t={metadata:{name:"mode",description:"Toggle vim mode (INSERT/NORMAL) - hjkl to scroll in NORMAL, i to INSERT",usage:"mode",category:o.CORE,aliases:["vim","m"]},execute(a,e={}){return e.toggleVimMode?(e.toggleVimMode(),""):"Mode switching not available"}};export{t as default};
