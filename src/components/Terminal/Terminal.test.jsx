@@ -676,7 +676,6 @@ describe('Terminal Component', () => {
       expect(screen.getByText('NORMAL')).toBeInTheDocument();
 
       // Test navigation keys (mock scrollTop to verify they're called)
-      const initialScrollTop = consoleElement.scrollTop;
       
       // Mock scroll properties
       Object.defineProperty(consoleElement, 'scrollTop', {
@@ -971,8 +970,6 @@ describe('Terminal Component', () => {
       await act(async () => {
         await vi.runAllTimersAsync();
       });
-
-      const consoleElement = screen.getByRole('textbox').closest('.container').querySelector('.console');
 
       // Simulate popstate event (browser back button)
       await act(async () => {

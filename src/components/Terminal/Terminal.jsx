@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import TerminalHeader from "./TerminalHeader";
 import TerminalConsole from "./TerminalConsole";
 import TerminalPrompt from "./TerminalPrompt";
@@ -53,6 +53,67 @@ function Terminal() {
 		return () => document.removeEventListener("keydown", handleGlobalKeyDown);
 	}, [vimMode]);
 
+	// Toggle fullscreen mode
+	const toggleFullscreen = useCallback((e) => {
+		if (e) e.stopPropagation(); // Prevent container click handler from firing
+		setIsFullscreen(!isFullscreen);
+
+		// Focus back on input after toggling
+		setTimeout(() => {
+			if (inputRef.current && vimMode === "INSERT") {
+				inputRef.current.focus();
+			}
+		}, 100);
+	}, [isFullscreen, vimMode]);
+
+	// Toggle vim mode
+	const toggleVimMode = useCallback(() => {
+		const newMode = vimMode === "INSERT" ? "NORMAL" : "INSERT";
+		setVimMode(newMode);
+
+		if (newMode === "INSERT") {
+			inputRef.current?.focus();
+		} else {
+			inputRef.current?.blur();
+		}
+
+		return newMode;
+	}, [vimMode]);
+
+	// Handle command execution
+	const processCommand = useCallback((commandStr) => {
+		const args = commandStr.trim().split(" ");
+		const cmd = args.shift().toLowerCase();
+
+		if (cmd === "") {
+			return "";
+		}
+
+		// Create context object with terminal state and functions
+		const context = {
+			toggleFullscreen,
+			toggleTheme,
+			toggleVimMode,
+			theme,
+		};
+
+		// Execute the command
+		try {
+			const output = executeCommand(cmd, args, context);
+
+			// Special handling for clear command
+			if (cmd === "clear" && output === "CLEAR_COMMAND") {
+				setCommandHistory([]);
+				return "";
+			}
+
+			return output;
+		} catch (e) {
+			console.error(`Error executing command ${cmd}:`, e);
+			return `Error executing command: ${e.message}`;
+		}
+	}, [toggleFullscreen, toggleTheme, toggleVimMode, theme]);
+
 	// Handle browser back/forward navigation
 	useEffect(() => {
 		const handlePopState = () => {
@@ -90,7 +151,7 @@ function Terminal() {
 
 		window.addEventListener('popstate', handlePopState);
 		return () => window.removeEventListener('popstate', handlePopState);
-	}, []);
+	}, [processCommand]);
 
 	// Load commands on component mount
 	useEffect(() => {
@@ -110,40 +171,6 @@ function Terminal() {
 
 		initializeCommands();
 	}, []);
-
-	// Handle command execution
-	const processCommand = (commandStr) => {
-		const args = commandStr.trim().split(" ");
-		const cmd = args.shift().toLowerCase();
-
-		if (cmd === "") {
-			return "";
-		}
-
-		// Create context object with terminal state and functions
-		const context = {
-			toggleFullscreen,
-			toggleTheme,
-			toggleVimMode,
-			theme,
-		};
-
-		// Execute the command
-		try {
-			const output = executeCommand(cmd, args, context);
-
-			// Special handling for clear command
-			if (cmd === "clear" && output === "CLEAR_COMMAND") {
-				setCommandHistory([]);
-				return "";
-			}
-
-			return output;
-		} catch (e) {
-			console.error(`Error executing command ${cmd}:`, e);
-			return `Error executing command: ${e.message}`;
-		}
-	};
 
 	// Add a new line to the command history
 	const addCommandToHistory = (command, isCommand = false, output = "") => {
@@ -487,33 +514,6 @@ function Terminal() {
 		}
 	};
 
-	// Toggle fullscreen mode
-	const toggleFullscreen = (e) => {
-		if (e) e.stopPropagation(); // Prevent container click handler from firing
-		setIsFullscreen(!isFullscreen);
-
-		// Focus back on input after toggling
-		setTimeout(() => {
-			if (inputRef.current && vimMode === "INSERT") {
-				inputRef.current.focus();
-			}
-		}, 100);
-	};
-
-	// Toggle vim mode
-	const toggleVimMode = () => {
-		const newMode = vimMode === "INSERT" ? "NORMAL" : "INSERT";
-		setVimMode(newMode);
-
-		if (newMode === "INSERT") {
-			inputRef.current?.focus();
-		} else {
-			inputRef.current?.blur();
-		}
-
-		return newMode;
-	};
-
 	// Handle input click - switch to INSERT mode
 	const handleInputClick = () => {
 		if (vimMode === "NORMAL") {
@@ -545,7 +545,7 @@ function Terminal() {
 				addCommandToHistory("");
 			}
 		}
-	}, [commandsLoaded]);
+	}, [commandsLoaded, commandHistory.length, processCommand]);
 
 	// Scroll to top of console when command history changes (after command execution)
 	useEffect(() => {

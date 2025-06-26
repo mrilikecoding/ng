@@ -18,7 +18,7 @@ const modeCommand = {
    * @param {Object} context - Context object with terminal state and methods
    * @returns {string} The mode toggle confirmation
    */
-  execute(args = [], context = {}) {
+  execute(args, context = {}) {
     if (context.toggleVimMode) {
       context.toggleVimMode();
       return ''; // Silent mode switch

@@ -37,7 +37,7 @@ export function getCommand(name) {
   }
   
   // If not found, search through aliases
-  for (const [commandName, command] of Object.entries(commandRegistry)) {
+  for (const [, command] of Object.entries(commandRegistry)) {
     if (command.metadata && command.metadata.aliases && command.metadata.aliases.includes(name)) {
       return command;
     }
