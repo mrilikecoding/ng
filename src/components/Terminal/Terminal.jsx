@@ -53,6 +53,45 @@ function Terminal() {
 		return () => document.removeEventListener("keydown", handleGlobalKeyDown);
 	}, [vimMode]);
 
+	// Handle browser back/forward navigation
+	useEffect(() => {
+		const handlePopState = () => {
+			const path = window.location.pathname;
+			const commandMap = {
+				'/': 'banner',
+				'/about': 'about',
+				'/contact': 'contact', 
+				'/projects': 'projects',
+				'/skills': 'skills'
+			};
+			
+			const command = commandMap[path];
+			if (command) {
+				// Execute the command without updating URL again
+				setInputValue(command);
+				const output = processCommand(command);
+				
+				// Clear console and add command
+				setCommandHistory([]);
+				addCommandToHistory(command, true);
+				
+				if (output) {
+					addCommandToHistory("");
+					output.split("\n").forEach((line) => {
+						addCommandToHistory(line);
+					});
+					addCommandToHistory("");
+				}
+				
+				setInputValue("");
+				setCursorPosition(0);
+			}
+		};
+
+		window.addEventListener('popstate', handlePopState);
+		return () => window.removeEventListener('popstate', handlePopState);
+	}, []);
+
 	// Load commands on component mount
 	useEffect(() => {
 		const initializeCommands = async () => {
@@ -148,6 +187,9 @@ function Terminal() {
 
 		// Execute the command
 		const output = processCommand(cmd);
+		
+		// Update URL for analytics tracking
+		updateUrlForCommand(cmd);
 
 		// Skip adding to history for mode commands (silent execution)
 		if (cmd !== "mode" && cmd !== "vim" && cmd !== "m") {
@@ -295,6 +337,25 @@ function Terminal() {
 		}
 	};
 
+	// Update URL for analytics tracking
+	const updateUrlForCommand = (commandName) => {
+		const contentCommands = ['about', 'contact', 'projects', 'skills'];
+		const coreRoutes = {
+			'banner': '/',
+			'welcome': '/',
+			'intro': '/',
+			'home': '/',
+			'h': '/'
+		};
+		
+		if (contentCommands.includes(commandName)) {
+			window.history.pushState(null, '', `/${commandName}`);
+		} else if (coreRoutes[commandName]) {
+			window.history.pushState(null, '', coreRoutes[commandName]);
+		}
+		// Don't update URL for core commands like help, clear, theme, etc.
+	};
+
 	// Handle key press in input
 	const handleKeyDown = (e) => {
 		// F11 or Alt+Enter to toggle fullscreen
@@ -362,6 +423,9 @@ function Terminal() {
 
 			// Execute command and get output
 			const output = processCommand(command);
+			
+			// Update URL for analytics tracking
+			updateUrlForCommand(commandName);
 
 			// Skip adding to history for mode commands (silent execution)
 			if (
@@ -457,6 +521,32 @@ function Terminal() {
 		}
 	};
 
+	// Handle initial URL routing on page load
+	useEffect(() => {
+		if (commandsLoaded && commandHistory.length === 0) {
+			const path = window.location.pathname;
+			const commandMap = {
+				'/': 'banner',
+				'/about': 'about',
+				'/contact': 'contact', 
+				'/projects': 'projects',
+				'/skills': 'skills'
+			};
+			
+			const command = commandMap[path] || 'banner';
+			// Execute the initial command
+			const output = processCommand(command);
+			
+			if (output) {
+				addCommandToHistory("");
+				output.split("\n").forEach((line) => {
+					addCommandToHistory(line);
+				});
+				addCommandToHistory("");
+			}
+		}
+	}, [commandsLoaded]);
+
 	// Scroll to top of console when command history changes (after command execution)
 	useEffect(() => {
 		if (consoleRef.current) {
@@ -464,27 +554,6 @@ function Terminal() {
 		}
 	}, [commandHistory]);
 
-	// Initial banner - using a ref to ensure it only runs once
-	const bannerShownRef = useRef(false);
-
-	useEffect(() => {
-		// Only show banner when commands are loaded and if not shown before
-		if (
-			commandsLoaded &&
-			commandHistory.length === 0 &&
-			!bannerShownRef.current
-		) {
-			bannerShownRef.current = true;
-			const bannerOutput = executeCommand("banner");
-			// Add spacing before banner
-			addCommandToHistory("");
-			bannerOutput.split("\n").forEach((line) => {
-				addCommandToHistory(line);
-			});
-			// Add spacing after banner
-			addCommandToHistory("");
-		}
-	}, [commandsLoaded, commandHistory.length]);
 
 	return (
 		<>

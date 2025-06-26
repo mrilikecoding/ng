@@ -93,7 +93,7 @@ describe('Terminal Component', () => {
       await vi.runAllTimersAsync();
     });
     
-    expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner');
+    expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner', [], expect.anything());
   });
 
   it('processes user input when enter is pressed', async () => {
@@ -822,6 +822,322 @@ describe('Terminal Component', () => {
       // Console content should be preserved (mode command is silent)
       expect(consoleElement.textContent).toBe(contentAfterHelp);
       expect(screen.getByText('NORMAL')).toBeInTheDocument();
+    });
+  });
+
+  describe('URL Routing Functionality', () => {
+    beforeEach(() => {
+      // Mock window.history
+      Object.defineProperty(window, 'history', {
+        value: {
+          pushState: vi.fn(),
+        },
+        writable: true,
+        configurable: true
+      });
+
+      // Mock window.location
+      Object.defineProperty(window, 'location', {
+        value: {
+          pathname: '/',
+        },
+        writable: true,
+        configurable: true
+      });
+
+      // Reset URL to root before each test
+      window.location.pathname = '/';
+    });
+
+    it('updates URL when content commands are executed', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Test about command
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'about' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/about');
+
+      // Test projects command
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'projects' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/projects');
+    });
+
+    it('updates URL to root for banner commands', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Test banner command
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'banner' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/');
+
+      // Test home alias
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'home' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/');
+    });
+
+    it('does not update URL for non-content commands', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Clear previous calls
+      vi.clearAllMocks();
+
+      // Test help command (should not update URL)
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'help' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).not.toHaveBeenCalled();
+
+      // Test clear command (should not update URL)
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'clear' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).not.toHaveBeenCalled();
+    });
+
+    it('handles browser back/forward navigation', async () => {
+      // Set initial URL to /about
+      window.location.pathname = '/about';
+
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const consoleElement = screen.getByRole('textbox').closest('.container').querySelector('.console');
+
+      // Simulate popstate event (browser back button)
+      await act(async () => {
+        window.location.pathname = '/projects';
+        const popstateEvent = new PopStateEvent('popstate', { state: null });
+        window.dispatchEvent(popstateEvent);
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Should execute projects command
+      expect(commandSystem.executeCommand).toHaveBeenCalledWith('projects', [], expect.anything());
+    });
+
+    it('loads correct command based on initial URL', async () => {
+      // Set URL to /skills before component loads
+      window.location.pathname = '/skills';
+
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      // Should execute skills command on initial load
+      expect(commandSystem.executeCommand).toHaveBeenCalledWith('skills', [], expect.anything());
+    });
+
+    it('defaults to banner for unknown URLs', async () => {
+      // Set URL to unknown path
+      window.location.pathname = '/unknown-path';
+
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      // Should default to banner command
+      expect(commandSystem.executeCommand).toHaveBeenCalledWith('banner', [], expect.anything());
+    });
+
+    it('handles clickable commands with URL updates', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      // Find a clickable command in the console and click it
+      const consoleElement = screen.getByRole('textbox').closest('.container').querySelector('.console');
+      
+      // First execute a command that creates clickable commands
+      const input = screen.getByRole('textbox');
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'help' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Clear previous history calls
+      vi.clearAllMocks();
+
+      // Find and click a command (about should be available as clickable)
+      const clickableCommands = consoleElement.querySelectorAll('.clickable-command');
+      if (clickableCommands.length > 0) {
+        const aboutCommand = Array.from(clickableCommands).find(cmd => cmd.textContent === 'about');
+        if (aboutCommand) {
+          await act(async () => {
+            fireEvent.click(aboutCommand);
+          });
+
+          await act(async () => {
+            vi.runAllTimers();
+          });
+
+          expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/about');
+        }
+      }
+    });
+
+    it('URL routing works with command aliases', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Test welcome alias (should route to /)
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'welcome' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/');
+
+      // Test intro alias (should route to /)
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'intro' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/');
+    });
+
+    it('preserves URL routing when mode commands are executed', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Clear previous calls
+      vi.clearAllMocks();
+
+      // Test mode command (should not update URL)
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).not.toHaveBeenCalled();
+
+      // Test vim alias (should not update URL)
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'vim' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(window.history.pushState).not.toHaveBeenCalled();
     });
   });
 });
