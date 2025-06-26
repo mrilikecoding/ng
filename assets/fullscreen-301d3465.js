@@ -1,1 +1,0 @@
-import{C as r}from"./index-95b12b48.js";const l={metadata:{name:"fullscreen",description:"Toggle fullscreen mode (or press F11)",usage:"fullscreen",category:r.CORE,aliases:["fs"]},execute(s,{toggleFullscreen:e}){return e?(setTimeout(()=>e(),100),"Toggling fullscreen mode..."):"Error: Fullscreen toggle function not available"}};export{l as default};

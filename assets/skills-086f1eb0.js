@@ -1,4 +1,4 @@
-import{C as e}from"./index-95b12b48.js";const a={metadata:{name:"skills",description:"List my technical skills",usage:"skills",category:e.CONTENT,aliases:["technologies","tech"]},execute(){return`Technical Skills:
+import{C as e}from"./index-72973aed.js";const a={metadata:{name:"skills",description:"List my technical skills",usage:"skills",category:e.CONTENT,aliases:["technologies","tech"]},execute(){return`Technical Skills:
 
 • Languages & Core: 
   - Python, JavaScript, HTML/CSS, Ruby
