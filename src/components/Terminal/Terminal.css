@@ -231,14 +231,24 @@
 	font-size: clamp(0.7rem, 1.5vw, 0.9rem);
 }
 
+.footer-links {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+}
+
 .footer-links a {
 	color: var(--link-color);
 	text-decoration: none;
-	margin: 0 0.5rem;
 }
 
 .footer-links a:hover {
 	text-decoration: underline;
+}
+
+.copyright {
+	color: var(--status-color);
+	font-size: 0.8rem;
 }
 
 .footer-right {

@@ -2,7 +2,7 @@ function TerminalFooter({ status, vimMode }) {
   return (
     <div className="footer">
       <div className="footer-links">
-        <a href="mailto:contact@nate.green">contact@nate.green</a> |
+        <a href="mailto:contact@nate.green">contact@nate.green</a>
         <a
           href="https://github.com/mrilikecoding"
           target="_blank"
@@ -10,6 +10,7 @@ function TerminalFooter({ status, vimMode }) {
         >
           github
         </a>
+        <span className="copyright">© 2025 Nate Green</span>
       </div>
       <div className="footer-right">
         <div className={`vim-mode vim-mode-${vimMode.toLowerCase()}`}>

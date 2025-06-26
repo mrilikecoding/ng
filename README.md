@@ -138,6 +138,23 @@ The site deploys automatically via GitHub Actions:
 
 This project is open source and available under the [MIT License](LICENSE).
 
+### License Scope
+
+The **MIT License applies to the source code** of this terminal interface framework, including:
+- ✅ Terminal UI components and styling
+- ✅ Command system and routing functionality  
+- ✅ React components and build configuration
+- ✅ Testing infrastructure and tooling
+
+The **license does NOT cover**:
+- ❌ Portfolio content and project descriptions
+- ❌ Personal information and biographical content
+- ❌ Images, logos, or creative assets
+- ❌ Any proprietary code examples or client work
+- ❌ Content displayed through terminal commands
+
+Feel free to use this terminal framework for your own projects while respecting the content licensing!
+
 ## 🔗 Connect
 
 - **Website**: [nate.green](https://nate.green)
