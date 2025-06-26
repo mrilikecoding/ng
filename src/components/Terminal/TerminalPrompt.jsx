@@ -1,5 +1,5 @@
 
-function TerminalPrompt({ inputRef, inputValue, cursorPosition, handleInputChange, handleKeyDown }) {
+function TerminalPrompt({ inputRef, inputValue, cursorPosition, handleInputChange, handleKeyDown, handleInputClick }) {
   return (
     <div className="prompt">
       <span className="prompt-prefix">guest@nate.green:~$</span>
@@ -10,6 +10,7 @@ function TerminalPrompt({ inputRef, inputValue, cursorPosition, handleInputChang
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onClick={handleInputClick}
           autoComplete="off"
           autoFocus
         />

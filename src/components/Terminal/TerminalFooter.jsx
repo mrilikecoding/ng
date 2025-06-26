@@ -1,4 +1,4 @@
-function TerminalFooter({ status }) {
+function TerminalFooter({ status, vimMode }) {
   return (
     <div className="footer">
       <div className="footer-links">
@@ -11,7 +11,12 @@ function TerminalFooter({ status }) {
           github
         </a>
       </div>
-      <div className="status">{status}</div>
+      <div className="footer-right">
+        <div className={`vim-mode vim-mode-${vimMode.toLowerCase()}`}>
+          {vimMode}
+        </div>
+        <div className="status">{status}</div>
+      </div>
     </div>
   );
 }

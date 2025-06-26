@@ -460,4 +460,368 @@ describe('Terminal Component', () => {
       expect(input.value).toBe('about');
     });
   });
+
+  describe('Vim Mode Functionality', () => {
+    beforeEach(() => {
+      // For vim mode tests, we need the actual Terminal component to handle mode switching
+      // The executeCommand mock should just return empty string for mode commands
+      commandSystem.executeCommand.mockImplementation((cmd, args, context) => {
+        if (cmd === 'mode' || cmd === 'vim' || cmd === 'm') {
+          // Call the actual toggleVimMode function if it exists in context
+          if (context && context.toggleVimMode) {
+            context.toggleVimMode();
+          }
+          return ''; // Silent mode switch
+        }
+        if (cmd === 'banner') return 'mock banner';
+        if (cmd === 'help') return 'mock help output';
+        if (cmd === 'about') return 'mock about output';
+        if (cmd === 'clear') return 'CLEAR_COMMAND';
+        return `Command not found: ${cmd}`;
+      });
+      
+      // Add mode command to getAllCommands
+      commandSystem.getAllCommands.mockReturnValue({
+        help: { metadata: { name: 'help' } },
+        banner: { metadata: { name: 'banner' } },
+        mode: { metadata: { name: 'mode', aliases: ['vim', 'm'] } },
+        clear: { metadata: { name: 'clear' } },
+        about: { metadata: { name: 'about' } },
+        skills: { metadata: { name: 'skills' } },
+        sitemap: { metadata: { name: 'sitemap' } },
+        fullscreen: { metadata: { name: 'fullscreen' } },
+        theme: { metadata: { name: 'theme' } }
+      });
+    });
+
+    it('starts in INSERT mode by default', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      // Check that the mode indicator shows INSERT
+      const modeIndicator = screen.getByText('INSERT');
+      expect(modeIndicator).toBeInTheDocument();
+      expect(modeIndicator).toHaveClass('vim-mode-insert');
+    });
+
+    it('toggles to NORMAL mode when mode command is executed', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Execute mode command
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Check that mode switched to NORMAL
+      const modeIndicator = screen.getByText('NORMAL');
+      expect(modeIndicator).toBeInTheDocument();
+      expect(modeIndicator).toHaveClass('vim-mode-normal');
+    });
+
+    it('mode command aliases work (vim, m)', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Test 'vim' alias
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'vim' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+
+      // Switch back to INSERT mode using 'i' key (since that works)
+      await act(async () => {
+        fireEvent.keyDown(document, { key: 'i' });
+      });
+
+      expect(screen.getByText('INSERT')).toBeInTheDocument();
+
+      // Now test 'm' alias 
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'm' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+    });
+
+    it('mode commands are silent (no console output)', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+      const consoleElement = input.closest('.container').querySelector('.console');
+      const initialConsoleContent = consoleElement.textContent;
+
+      // Execute mode command
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Console content should be unchanged (no command echo or output)
+      expect(consoleElement.textContent).toBe(initialConsoleContent);
+      
+      // Should not contain the command prompt
+      expect(consoleElement.textContent).not.toContain('guest@nate.green:~$ mode');
+    });
+
+    it('switches to INSERT mode when i key is pressed in NORMAL mode', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Switch to NORMAL mode first
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+
+      // Press 'i' key globally (simulating global key listener)
+      await act(async () => {
+        fireEvent.keyDown(document, { key: 'i' });
+      });
+
+      // Should switch back to INSERT mode
+      expect(screen.getByText('INSERT')).toBeInTheDocument();
+    });
+
+    it('handles vim navigation keys in NORMAL mode', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+      const consoleElement = input.closest('.container').querySelector('.console');
+
+      // Add some content to scroll
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'help' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Switch to NORMAL mode
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+
+      // Test navigation keys (mock scrollTop to verify they're called)
+      const initialScrollTop = consoleElement.scrollTop;
+      
+      // Mock scroll properties
+      Object.defineProperty(consoleElement, 'scrollTop', {
+        value: 0,
+        writable: true,
+        configurable: true
+      });
+      Object.defineProperty(consoleElement, 'scrollHeight', {
+        value: 1000,
+        writable: false,
+        configurable: true
+      });
+      Object.defineProperty(consoleElement, 'clientHeight', {
+        value: 500,
+        writable: false,
+        configurable: true
+      });
+
+      // Test 'j' key (scroll down)
+      await act(async () => {
+        fireEvent.keyDown(document, { key: 'j' });
+      });
+
+      // Test 'k' key (scroll up)
+      await act(async () => {
+        fireEvent.keyDown(document, { key: 'k' });
+      });
+
+      // Test 'h' and 'l' keys
+      await act(async () => {
+        fireEvent.keyDown(document, { key: 'h' });
+        fireEvent.keyDown(document, { key: 'l' });
+      });
+
+      // The navigation keys should not cause errors
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+    });
+
+    it('clicking input field switches to INSERT mode from NORMAL mode', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Switch to NORMAL mode first
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+
+      // Click the input field
+      await act(async () => {
+        fireEvent.click(input);
+      });
+
+      // Should switch to INSERT mode
+      expect(screen.getByText('INSERT')).toBeInTheDocument();
+    });
+
+    it('regular input only works in INSERT mode', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+
+      // Switch to NORMAL mode
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+
+      // Try to type in input field - should not work in NORMAL mode
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'help' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Command should not have been executed (still in NORMAL mode, input ignored)
+      expect(commandSystem.executeCommand).not.toHaveBeenCalledWith('help', [], expect.anything());
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+    });
+
+    it('preserves console history when switching modes', async () => {
+      await act(async () => {
+        renderTerminal();
+      });
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      const input = screen.getByRole('textbox');
+      const consoleElement = input.closest('.container').querySelector('.console');
+
+      // Execute a command to add content
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'help' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      const contentAfterHelp = consoleElement.textContent;
+
+      // Switch to NORMAL mode
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'mode' }});
+        fireEvent.keyDown(input, { key: 'Enter' });
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      // Console content should be preserved (mode command is silent)
+      expect(consoleElement.textContent).toBe(contentAfterHelp);
+      expect(screen.getByText('NORMAL')).toBeInTheDocument();
+    });
+  });
 });

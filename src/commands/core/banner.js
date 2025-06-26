@@ -10,7 +10,7 @@ const bannerCommand = {
 		description: "Display welcome banner",
 		usage: "banner",
 		category: CATEGORIES.CORE,
-		aliases: ["welcome", "intro"],
+		aliases: ["welcome", "intro", "home", "h"],
 	},
 
 	/**
@@ -41,9 +41,9 @@ ${rainbowArt}
 Welcome to the nate.green interactive terminal [Version ${packageJson.version}]
 
 Available ng-cli commands:
-<cmd>about</cmd> - Display information about me
+<cmd>about</cmd> - Who dis?
 <cmd>contact</cmd> - Get in touch
-<cmd>projects</cmd> - Show my portfolio
+<cmd>projects</cmd> - Open source stuff
 <cmd>skills</cmd> - List my technical skills
 
 Type '<cmd>help</cmd>' for all commands.`;

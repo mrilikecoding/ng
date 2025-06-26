@@ -4,7 +4,11 @@ import TerminalConsole from "./TerminalConsole";
 import TerminalPrompt from "./TerminalPrompt";
 import TerminalFooter from "./TerminalFooter";
 import { useTheme } from "../../contexts/ThemeContext";
-import { loadCommands, executeCommand, getAllCommands } from "../../commands/index";
+import {
+	loadCommands,
+	executeCommand,
+	getAllCommands,
+} from "../../commands/index";
 import "./Terminal.css";
 
 function Terminal() {
@@ -16,12 +20,38 @@ function Terminal() {
 	const [commandsLoaded, setCommandsLoaded] = useState(false);
 	const [inputHistory, setInputHistory] = useState([]);
 	const [historyIndex, setHistoryIndex] = useState(-1);
+	const [vimMode, setVimMode] = useState("INSERT"); // INSERT or NORMAL
 	const { theme, toggleTheme } = useTheme();
 
 	const consoleRef = useRef(null);
 	const inputRef = useRef(null);
 	// Reference for future command registry manipulations
 	// const commandRegistryRef = useRef({});
+
+	// Global key listener for NORMAL mode
+	useEffect(() => {
+		const handleGlobalKeyDown = (e) => {
+			if (vimMode === "NORMAL") {
+				// Switch to INSERT mode
+				if (e.key === "i") {
+					e.preventDefault();
+					setVimMode("INSERT");
+					inputRef.current?.focus();
+					return;
+				}
+
+				// Vim navigation keys
+				if (e.key === "h" || e.key === "j" || e.key === "k" || e.key === "l") {
+					e.preventDefault();
+					handleVimNavigation(e.key);
+					return;
+				}
+			}
+		};
+
+		document.addEventListener("keydown", handleGlobalKeyDown);
+		return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+	}, [vimMode]);
 
 	// Load commands on component mount
 	useEffect(() => {
@@ -55,6 +85,7 @@ function Terminal() {
 		const context = {
 			toggleFullscreen,
 			toggleTheme,
+			toggleVimMode,
 			theme,
 		};
 
@@ -87,18 +118,20 @@ function Terminal() {
 	// Utility to detect mobile/touch devices
 	const isMobileDevice = () => {
 		return (
-			'ontouchstart' in window ||
+			"ontouchstart" in window ||
 			navigator.maxTouchPoints > 0 ||
 			navigator.msMaxTouchPoints > 0 ||
-			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+				navigator.userAgent,
+			)
 		);
 	};
 
 	// Handle clickable command
 	const handleCommandClick = (cmd) => {
 		// Add command to input history
-		setInputHistory(prev => {
-			const filtered = prev.filter(command => command !== cmd);
+		setInputHistory((prev) => {
+			const filtered = prev.filter((command) => command !== cmd);
 			return [...filtered, cmd].slice(-50);
 		});
 
@@ -108,26 +141,39 @@ function Terminal() {
 		// Set the command in the input field
 		setInputValue(cmd);
 
-		// Clear terminal before executing command
-		setCommandHistory([]);
-
-		// Execute the command
-		addCommandToHistory(cmd, true);
-
-		// Get output
-		const output = processCommand(cmd);
-		if (output) {
-			// Add spacing before output
-			addCommandToHistory("");
-			output.split("\n").forEach((line) => {
-				addCommandToHistory(line);
-			});
-			// Add spacing after output
-			addCommandToHistory("");
+		// Clear terminal before executing command (skip for mode commands)
+		if (cmd !== "mode" && cmd !== "vim" && cmd !== "m") {
+			setCommandHistory([]);
 		}
 
-		// Add available commands footer to output (skip for banner and help commands)
-		if (cmd !== 'banner' && !cmd.startsWith('banner ') && cmd !== 'help' && !cmd.startsWith('help ')) {
+		// Execute the command
+		const output = processCommand(cmd);
+
+		// Skip adding to history for mode commands (silent execution)
+		if (cmd !== "mode" && cmd !== "vim" && cmd !== "m") {
+			addCommandToHistory(cmd, true);
+
+			if (output) {
+				// Add spacing before output
+				addCommandToHistory("");
+				output.split("\n").forEach((line) => {
+					addCommandToHistory(line);
+				});
+				// Add spacing after output
+				addCommandToHistory("");
+			}
+		}
+
+		// Add available commands footer to output (skip for banner, help, and mode commands)
+		if (
+			cmd !== "banner" &&
+			!cmd.startsWith("banner ") &&
+			cmd !== "help" &&
+			!cmd.startsWith("help ") &&
+			cmd !== "mode" &&
+			cmd !== "vim" &&
+			cmd !== "m"
+		) {
 			addCommandToHistory("=-=-=-=-=-=-=-=-=-=");
 			addCommandToHistory(
 				"ng-cli available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
@@ -152,15 +198,25 @@ function Terminal() {
 			return Object.keys(commands);
 		} catch (error) {
 			// Fallback to default commands if registry not loaded
-			return ['help', 'about', 'skills', 'projects', 'contact', 'sitemap', 'clear', 'theme', 'fullscreen'];
+			return [
+				"help",
+				"about",
+				"skills",
+				"projects",
+				"contact",
+				"sitemap",
+				"clear",
+				"theme",
+				"fullscreen",
+			];
 		}
 	};
 
 	// Handle tab completion
 	const handleTabCompletion = () => {
 		const availableCommands = getAvailableCommands();
-		const matches = availableCommands.filter(cmd => 
-			cmd.toLowerCase().startsWith(inputValue.toLowerCase())
+		const matches = availableCommands.filter((cmd) =>
+			cmd.toLowerCase().startsWith(inputValue.toLowerCase()),
 		);
 
 		if (matches.length === 1) {
@@ -170,7 +226,7 @@ function Terminal() {
 		} else if (matches.length > 1) {
 			// Multiple matches - show suggestions without changing input
 			addCommandToHistory(`${inputValue}`, false);
-			addCommandToHistory(`Possible completions: ${matches.join(', ')}`, false);
+			addCommandToHistory(`Possible completions: ${matches.join(", ")}`, false);
 		}
 		// If no matches, do nothing (keep input unchanged)
 	};
@@ -180,19 +236,63 @@ function Terminal() {
 		if (inputHistory.length === 0) return;
 
 		let newIndex;
-		if (direction === 'up') {
-			newIndex = historyIndex === -1 ? inputHistory.length - 1 : Math.max(0, historyIndex - 1);
+		if (direction === "up") {
+			newIndex =
+				historyIndex === -1
+					? inputHistory.length - 1
+					: Math.max(0, historyIndex - 1);
 		} else {
-			newIndex = historyIndex === -1 ? -1 : Math.min(inputHistory.length - 1, historyIndex + 1);
-			if (newIndex === inputHistory.length - 1 && historyIndex === inputHistory.length - 1) {
+			newIndex =
+				historyIndex === -1
+					? -1
+					: Math.min(inputHistory.length - 1, historyIndex + 1);
+			if (
+				newIndex === inputHistory.length - 1 &&
+				historyIndex === inputHistory.length - 1
+			) {
 				newIndex = -1;
 			}
 		}
 
 		setHistoryIndex(newIndex);
-		const newValue = newIndex === -1 ? '' : inputHistory[newIndex];
+		const newValue = newIndex === -1 ? "" : inputHistory[newIndex];
 		setInputValue(newValue);
 		setCursorPosition(newValue.length);
+	};
+
+	// Handle vim navigation in NORMAL mode
+	const handleVimNavigation = (key) => {
+		if (!consoleRef.current) return;
+
+		const scrollAmount = 50; // pixels to scroll
+		const currentScroll = consoleRef.current.scrollTop;
+		const maxScroll =
+			consoleRef.current.scrollHeight - consoleRef.current.clientHeight;
+
+		switch (key) {
+			case "j": // scroll down
+				consoleRef.current.scrollTop = Math.min(
+					currentScroll + scrollAmount,
+					maxScroll,
+				);
+				break;
+			case "k": // scroll up
+				consoleRef.current.scrollTop = Math.max(
+					currentScroll - scrollAmount,
+					0,
+				);
+				break;
+			case "h": // scroll left (not much use in terminal, but for completeness)
+				consoleRef.current.scrollLeft = Math.max(
+					consoleRef.current.scrollLeft - scrollAmount,
+					0,
+				);
+				break;
+			case "l": // scroll right
+				consoleRef.current.scrollLeft =
+					consoleRef.current.scrollLeft + scrollAmount;
+				break;
+		}
 	};
 
 	// Handle key press in input
@@ -201,6 +301,11 @@ function Terminal() {
 		if (e.key === "F11" || (e.altKey && e.key === "Enter")) {
 			e.preventDefault();
 			toggleFullscreen(e);
+			return;
+		}
+
+		// Only handle regular input in INSERT mode
+		if (vimMode !== "INSERT") {
 			return;
 		}
 
@@ -214,13 +319,13 @@ function Terminal() {
 		// Command history navigation
 		if (e.key === "ArrowUp") {
 			e.preventDefault();
-			navigateHistory('up');
+			navigateHistory("up");
 			return;
 		}
 
 		if (e.key === "ArrowDown") {
 			e.preventDefault();
-			navigateHistory('down');
+			navigateHistory("down");
 			return;
 		}
 
@@ -234,9 +339,9 @@ function Terminal() {
 
 			// Only add non-empty commands to input history
 			if (command) {
-				setInputHistory(prev => {
+				setInputHistory((prev) => {
 					// Avoid duplicates - remove if command already exists
-					const filtered = prev.filter(cmd => cmd !== command);
+					const filtered = prev.filter((cmd) => cmd !== command);
 					// Add to end and limit to last 50 commands
 					return [...filtered, command].slice(-50);
 				});
@@ -245,29 +350,51 @@ function Terminal() {
 			// Reset history navigation
 			setHistoryIndex(-1);
 
-			// Clear terminal before executing command
-			setCommandHistory([]);
-
-			// Add command to history display
-			addCommandToHistory(command, true);
+			// Clear terminal before executing command (skip for mode commands)
+			const commandName = command.split(" ")[0];
+			if (
+				commandName !== "mode" &&
+				commandName !== "vim" &&
+				commandName !== "m"
+			) {
+				setCommandHistory([]);
+			}
 
 			// Execute command and get output
 			const output = processCommand(command);
-			if (output) {
-				// Add spacing before output
-				addCommandToHistory("");
-				output.split("\n").forEach((line) => {
-					addCommandToHistory(line);
-				});
-				// Add spacing after output
-				addCommandToHistory("");
+
+			// Skip adding to history for mode commands (silent execution)
+			if (
+				commandName !== "mode" &&
+				commandName !== "vim" &&
+				commandName !== "m"
+			) {
+				addCommandToHistory(command, true);
+
+				if (output) {
+					// Add spacing before output
+					addCommandToHistory("");
+					output.split("\n").forEach((line) => {
+						addCommandToHistory(line);
+					});
+					// Add spacing after output
+					addCommandToHistory("");
+				}
 			}
 
-			// Add available commands footer to output (skip for banner and help commands)
-			if (command !== 'banner' && !command.startsWith('banner ') && command !== 'help' && !command.startsWith('help ')) {
+			// Add available commands footer to output (skip for banner, help, and mode commands)
+			if (
+				command !== "banner" &&
+				!command.startsWith("banner ") &&
+				command !== "help" &&
+				!command.startsWith("help ") &&
+				commandName !== "mode" &&
+				commandName !== "vim" &&
+				commandName !== "m"
+			) {
 				addCommandToHistory("");
 				addCommandToHistory(
-					"Available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+					"<cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
 				);
 			}
 
@@ -303,10 +430,31 @@ function Terminal() {
 
 		// Focus back on input after toggling
 		setTimeout(() => {
-			if (inputRef.current) {
+			if (inputRef.current && vimMode === "INSERT") {
 				inputRef.current.focus();
 			}
 		}, 100);
+	};
+
+	// Toggle vim mode
+	const toggleVimMode = () => {
+		const newMode = vimMode === "INSERT" ? "NORMAL" : "INSERT";
+		setVimMode(newMode);
+
+		if (newMode === "INSERT") {
+			inputRef.current?.focus();
+		} else {
+			inputRef.current?.blur();
+		}
+
+		return newMode;
+	};
+
+	// Handle input click - switch to INSERT mode
+	const handleInputClick = () => {
+		if (vimMode === "NORMAL") {
+			setVimMode("INSERT");
+		}
 	};
 
 	// Scroll to top of console when command history changes (after command execution)
@@ -365,9 +513,10 @@ function Terminal() {
 					cursorPosition={cursorPosition}
 					handleInputChange={handleInputChange}
 					handleKeyDown={handleKeyDown}
+					handleInputClick={handleInputClick}
 				/>
 
-				<TerminalFooter status={status} />
+				<TerminalFooter status={status} vimMode={vimMode} />
 			</div>
 		</>
 	);

@@ -241,6 +241,33 @@
 	text-decoration: underline;
 }
 
+.footer-right {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.vim-mode {
+	font-family: "Courier New", monospace;
+	font-weight: bold;
+	padding: 0.2rem 0.5rem;
+	border-radius: 3px;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	min-width: 60px;
+	text-align: center;
+}
+
+.vim-mode-insert {
+	background-color: var(--command-color);
+	color: var(--bg-color);
+}
+
+.vim-mode-normal {
+	background-color: #f59e0b;
+	color: #1f2937;
+}
+
 /* Terminal content links */
 .console a {
 	color: var(--link-color) !important;

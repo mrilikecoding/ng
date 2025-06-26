@@ -90,6 +90,9 @@ export async function loadCommands() {
     const sitemapModule = await import('./core/sitemap.js');
     registerCommand('sitemap', sitemapModule.default);
     
+    const modeModule = await import('./core/mode.js');
+    registerCommand('mode', modeModule.default);
+    
     // Load content commands
     const aboutModule = await import('./content/about.js');
     registerCommand('about', aboutModule.default);
