@@ -120,7 +120,6 @@ function Terminal() {
 			const path = window.location.pathname;
 			const commandMap = {
 				'/': 'banner',
-				'/about': 'about',
 				'/contact': 'contact', 
 				'/projects': 'projects',
 				'/skills': 'skills'
@@ -245,7 +244,7 @@ function Terminal() {
 		) {
 			addCommandToHistory("=-=-=-=-=-=-=-=-=-=");
 			addCommandToHistory(
-				"ng-cli available commands: <cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+				"ng-cli available commands: <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
 			);
 		}
 
@@ -366,7 +365,7 @@ function Terminal() {
 
 	// Update URL for analytics tracking
 	const updateUrlForCommand = (commandName) => {
-		const contentCommands = ['about', 'contact', 'projects', 'skills'];
+		const contentCommands = ['contact', 'projects', 'skills'];
 		const coreRoutes = {
 			'banner': '/',
 			'welcome': '/',
@@ -485,7 +484,7 @@ function Terminal() {
 			) {
 				addCommandToHistory("");
 				addCommandToHistory(
-					"<cmd>about</cmd> | <cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
+					"<cmd>skills</cmd> | <cmd>projects</cmd> | <cmd>contact</cmd> | <cmd>help</cmd> | <cmd>sitemap</cmd> | <cmd>theme</cmd> | <cmd>fullscreen</cmd>",
 				);
 			}
 
@@ -527,7 +526,6 @@ function Terminal() {
 			const path = window.location.pathname;
 			const commandMap = {
 				'/': 'banner',
-				'/about': 'about',
 				'/contact': 'contact', 
 				'/projects': 'projects',
 				'/skills': 'skills'

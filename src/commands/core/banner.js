@@ -40,11 +40,12 @@ ${rainbowArt}
 
 Welcome to the nate.green interactive terminal [Version ${packageJson.version}]
 
+I build tools and software that support creativity, research, and human flourishing 🚀✨🌱
+
 Available ng-cli commands:
-<cmd>about</cmd> - Who dis?
-<cmd>contact</cmd> - Get in touch
 <cmd>projects</cmd> - Open source stuff
 <cmd>skills</cmd> - List my technical skills
+<cmd>contact</cmd> - Get in touch
 
 Type '<cmd>help</cmd>' for all commands.`;
 	},

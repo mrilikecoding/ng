@@ -20,7 +20,6 @@ const sitemapCommand = {
     return `Site Structure & Commands
 
 Core Navigation:
-├── <cmd>about</cmd>      Learn about me and my background
 ├── <cmd>skills</cmd>     Technical skills and expertise  
 ├── <cmd>projects</cmd>   Recent work and projects
 └── <cmd>contact</cmd>    Get in touch

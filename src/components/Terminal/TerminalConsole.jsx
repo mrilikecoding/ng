@@ -4,7 +4,7 @@ import { getAllCommands } from '../../commands/index';
 function TerminalConsole({ consoleRef, commandHistory, handleCommandClick }) {
   // Set default commands list so we don't have to wait for getAllCommands() to load
   const [, setAvailableCommands] = useState([
-    'help', 'about', 'skills', 'projects', 'contact', 'clear', 'banner', 'fullscreen', 'theme', 'sitemap'
+    'help', 'skills', 'projects', 'contact', 'clear', 'banner', 'fullscreen', 'theme', 'sitemap'
   ]);
 
   // Load commands from registry when available

@@ -94,9 +94,6 @@ export async function loadCommands() {
     registerCommand('mode', modeModule.default);
     
     // Load content commands
-    const aboutModule = await import('./content/about.js');
-    registerCommand('about', aboutModule.default);
-    
     const skillsModule = await import('./content/skills.js');
     registerCommand('skills', skillsModule.default);
     

@@ -38,7 +38,6 @@ vi.mock('../../commands/index', () => ({
   executeCommand: vi.fn(cmd => {
     if (cmd === 'banner') return 'mock banner';
     if (cmd === 'help') return 'mock help output';
-    if (cmd === 'about') return 'mock about output';
     if (cmd === 'clear') return 'CLEAR_COMMAND';
     if (cmd === 'fullscreen') return 'mock fullscreen output';
     if (cmd === 'theme') return 'mock theme output';
@@ -49,7 +48,6 @@ vi.mock('../../commands/index', () => ({
     help: { metadata: { name: 'help' } },
     banner: { metadata: { name: 'banner' } }, 
     clear: { metadata: { name: 'clear' } }, 
-    about: { metadata: { name: 'about' } }, 
     skills: { metadata: { name: 'skills' } },
     sitemap: { metadata: { name: 'sitemap' } },
     fullscreen: { metadata: { name: 'fullscreen' } }, 
@@ -73,7 +71,6 @@ describe('Terminal Component', () => {
       help: { metadata: { name: 'help' } },
       banner: { metadata: { name: 'banner' } }, 
       clear: { metadata: { name: 'clear' } }, 
-      about: { metadata: { name: 'about' } }, 
       skills: { metadata: { name: 'skills' } },
       sitemap: { metadata: { name: 'sitemap' } },
       fullscreen: { metadata: { name: 'fullscreen' } }, 
@@ -240,7 +237,7 @@ describe('Terminal Component', () => {
 
       // Execute second command
       await act(async () => {
-        fireEvent.change(input, { target: { value: 'about' }});
+        fireEvent.change(input, { target: { value: 'skills' }});
         fireEvent.keyDown(input, { key: 'Enter' });
       });
 
@@ -253,7 +250,7 @@ describe('Terminal Component', () => {
         fireEvent.keyDown(input, { key: 'ArrowUp' });
       });
 
-      expect(input.value).toBe('about');
+      expect(input.value).toBe('skills');
 
       // Navigate up again
       await act(async () => {
@@ -267,7 +264,7 @@ describe('Terminal Component', () => {
         fireEvent.keyDown(input, { key: 'ArrowDown' });
       });
 
-      expect(input.value).toBe('about');
+      expect(input.value).toBe('skills');
     });
 
     it('handles empty history gracefully', async () => {
@@ -449,7 +446,7 @@ describe('Terminal Component', () => {
 
       // Start typing - should reset history
       await act(async () => {
-        fireEvent.change(input, { target: { value: 'about' }});
+        fireEvent.change(input, { target: { value: 'skills' }});
       });
 
       // Try tab completion
@@ -457,7 +454,7 @@ describe('Terminal Component', () => {
         fireEvent.keyDown(input, { key: 'Tab' });
       });
 
-      expect(input.value).toBe('about');
+      expect(input.value).toBe('skills');
     });
   });
 
@@ -475,7 +472,6 @@ describe('Terminal Component', () => {
         }
         if (cmd === 'banner') return 'mock banner';
         if (cmd === 'help') return 'mock help output';
-        if (cmd === 'about') return 'mock about output';
         if (cmd === 'clear') return 'CLEAR_COMMAND';
         return `Command not found: ${cmd}`;
       });
@@ -486,7 +482,6 @@ describe('Terminal Component', () => {
         banner: { metadata: { name: 'banner' } },
         mode: { metadata: { name: 'mode', aliases: ['vim', 'm'] } },
         clear: { metadata: { name: 'clear' } },
-        about: { metadata: { name: 'about' } },
         skills: { metadata: { name: 'skills' } },
         sitemap: { metadata: { name: 'sitemap' } },
         fullscreen: { metadata: { name: 'fullscreen' } },
@@ -859,9 +854,9 @@ describe('Terminal Component', () => {
 
       const input = screen.getByRole('textbox');
 
-      // Test about command
+      // Test contact command
       await act(async () => {
-        fireEvent.change(input, { target: { value: 'about' }});
+        fireEvent.change(input, { target: { value: 'contact' }});
         fireEvent.keyDown(input, { key: 'Enter' });
       });
 
@@ -869,7 +864,7 @@ describe('Terminal Component', () => {
         vi.runAllTimers();
       });
 
-      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/about');
+      expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/contact');
 
       // Test projects command
       await act(async () => {
@@ -960,8 +955,8 @@ describe('Terminal Component', () => {
     });
 
     it('handles browser back/forward navigation', async () => {
-      // Set initial URL to /about
-      window.location.pathname = '/about';
+      // Set initial URL to /contact
+      window.location.pathname = '/contact';
 
       await act(async () => {
         renderTerminal();
@@ -1044,20 +1039,20 @@ describe('Terminal Component', () => {
       // Clear previous history calls
       vi.clearAllMocks();
 
-      // Find and click a command (about should be available as clickable)
+      // Find and click a command (contact should be available as clickable)
       const clickableCommands = consoleElement.querySelectorAll('.clickable-command');
       if (clickableCommands.length > 0) {
-        const aboutCommand = Array.from(clickableCommands).find(cmd => cmd.textContent === 'about');
-        if (aboutCommand) {
+        const contactCommand = Array.from(clickableCommands).find(cmd => cmd.textContent === 'contact');
+        if (contactCommand) {
           await act(async () => {
-            fireEvent.click(aboutCommand);
+            fireEvent.click(contactCommand);
           });
 
           await act(async () => {
             vi.runAllTimers();
           });
 
-          expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/about');
+          expect(window.history.pushState).toHaveBeenCalledWith(null, '', '/contact');
         }
       }
     });

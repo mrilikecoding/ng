@@ -375,6 +375,10 @@
 		font-size: 0.8rem;
 	}
 
+	.footer-right {
+		display: none;
+	}
+
 	.domain {
 		font-size: 1.1rem;
 	}
