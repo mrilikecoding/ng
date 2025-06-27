@@ -1,4 +1,4 @@
-import{C as i,g as r}from"./index-95f00b94.js";const p={metadata:{name:"help",description:"Display available commands",usage:"help [command]",category:i.CORE,aliases:["?","commands"]},execute(s=[]){const c=r();if(s.length>0){const e=s[0].toLowerCase(),o=c[e];if(!o)return`Command '${e}' not found. Type 'help' for a list of available commands.`;const{metadata:a}=o;return`
+import{C as i,g as r}from"./index-7fad4434.js";const p={metadata:{name:"help",description:"Display available commands",usage:"help [command]",category:i.CORE,aliases:["?","commands"]},execute(s=[]){const c=r();if(s.length>0){const e=s[0].toLowerCase(),o=c[e];if(!o)return`Command '${e}' not found. Type 'help' for a list of available commands.`;const{metadata:a}=o;return`
 Help: ${a.name}
 ${"=".repeat(a.name.length+6)}
 Description: ${a.description}

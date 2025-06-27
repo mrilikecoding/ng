@@ -1,7 +1,6 @@
-import{C as e}from"./index-95f00b94.js";const t={metadata:{name:"sitemap",description:"Show site structure and available commands",usage:"sitemap",category:e.CORE,aliases:["map","structure"]},execute(){return`Site Structure & Commands
+import{C as e}from"./index-7fad4434.js";const a={metadata:{name:"sitemap",description:"Show site structure and available commands",usage:"sitemap",category:e.CORE,aliases:["map","structure"]},execute(){return`Site Structure & Commands
 
 Core Navigation:
-├── <cmd>about</cmd>      Learn about me and my background
 ├── <cmd>skills</cmd>     Technical skills and expertise  
 ├── <cmd>projects</cmd>   Recent work and projects
 └── <cmd>contact</cmd>    Get in touch
@@ -24,4 +23,4 @@ nate.green/
 ├── About Section
 ├── Skills Overview  
 ├── Project Portfolio
-└── Contact Information`}};export{t as default};
+└── Contact Information`}};export{a as default};
