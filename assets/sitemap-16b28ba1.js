@@ -1,4 +1,4 @@
-import{C as e}from"./index-7fad4434.js";const a={metadata:{name:"sitemap",description:"Show site structure and available commands",usage:"sitemap",category:e.CORE,aliases:["map","structure"]},execute(){return`Site Structure & Commands
+import{C as e}from"./index-0820f11f.js";const a={metadata:{name:"sitemap",description:"Show site structure and available commands",usage:"sitemap",category:e.CORE,aliases:["map","structure"]},execute(){return`Site Structure & Commands
 
 Core Navigation:
 ├── <cmd>skills</cmd>     Technical skills and expertise  
