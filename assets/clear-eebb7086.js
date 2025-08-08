@@ -1,0 +1,1 @@
+import{C as e}from"./index-a1290ecb.js";const r={metadata:{name:"clear",description:"Clear the console",usage:"clear",category:e.CORE,aliases:["cls"]},execute(){return"CLEAR_COMMAND"}};export{r as default};
